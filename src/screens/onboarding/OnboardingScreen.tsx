@@ -110,11 +110,11 @@ const OnboardingScreen = ({ navigation }: OnboardingScreenProps) => {
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-            {/* Decorative Full Background */}
+            {/* Bottom Decorative Curved Background */}
             <Image
-                source={require('../../assets/images/ScreenBg.png')}
-                style={StyleSheet.absoluteFill}
-                resizeMode="cover"
+                source={require('../../assets/images/PageBottombg.png')}
+                style={styles.bottomBgImage}
+                resizeMode="stretch"
                 pointerEvents="none"
             />
 
@@ -169,6 +169,16 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
         position: 'relative',
+    },
+
+    bottomBgImage: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        height: 130,
+        zIndex: 0,
     },
 
 
@@ -257,7 +267,8 @@ const styles = StyleSheet.create({
     },
 
     paginationWrapper: {
-        marginBottom: spacing.xl,
+        marginBottom: spacing.xxl,
+        paddingVertical: spacing.lg,
     },
 
     buttonWrapper: {
