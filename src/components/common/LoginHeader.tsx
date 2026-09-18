@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Logo from './Logo';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
@@ -7,11 +8,7 @@ import { typography } from '../../theme/typography';
 const LoginHeader = () => {
     return (
         <View style={styles.container}>
-            <Image
-                source={require('../../assets/Logo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-            />
+            <Logo width={240} style={styles.logo} />
 
             <Text style={styles.title}>Welcome Back</Text>
 
@@ -29,8 +26,6 @@ const styles = StyleSheet.create({
     },
 
     logo: {
-        width: 250,
-        height: 120,
         marginBottom: spacing.xl,
     },
 

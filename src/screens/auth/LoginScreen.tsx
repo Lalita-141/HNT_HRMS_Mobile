@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -23,29 +22,6 @@ const LoginScreen = () => {
         <AppScreen scroll>
 
             <View style={styles.container}>
-
-                {/* ============================= */}
-                {/* Top Background Decoration */}
-                {/* ============================= */}
-
-                <Image
-                    source={require('../../assets/images/PageTopbg.png')}
-                    style={styles.topBackground}
-                    resizeMode="cover"
-                    pointerEvents="none"
-                />
-
-                {/* ============================= */}
-                {/* Bottom Background Decoration */}
-                {/* ============================= */}
-
-                <Image
-                    source={require('../../assets/images/PageBottombg.png')}
-                    style={styles.bottomBackground}
-                    resizeMode="cover"
-                    pointerEvents="none"
-                />
-
                 {/* ============================= */}
                 {/* Login Content */}
                 {/* ============================= */}
@@ -124,34 +100,7 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         width: '100%',
-        backgroundColor: colors.white,
         position: 'relative',
-    },
-
-    /**
-     * Top decorative PNG
-     */
-    topBackground: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
-        height: 230,
-        zIndex: 0,
-    },
-
-    /**
-     * Bottom decorative PNG
-     */
-    bottomBackground: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
-        height: 300,
-        zIndex: 0,
     },
 
     /**
