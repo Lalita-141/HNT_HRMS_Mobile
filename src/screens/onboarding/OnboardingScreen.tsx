@@ -66,7 +66,7 @@ const OnboardingScreen = ({ navigation }: OnboardingScreenProps) => {
     const isLastSlide = currentIndex === ONBOARDING_DATA.length - 1;
 
     // Responsive illustration sizing
-    const illustrationHeight = Math.min(windowHeight * 0.36, 320);
+    // const illustrationHeight = Math.min(windowHeight * 0.36, 320);
 
     const renderSlide = ({ item }: { item: OnboardingSlideItem }) => {
         return (
@@ -95,12 +95,12 @@ const OnboardingScreen = ({ navigation }: OnboardingScreenProps) => {
                     <View
                         style={[
                             styles.imageWrapper,
-                            { height: illustrationHeight },
+                            { height: windowHeight / 2.2 },
                         ]}>
                         <Image
                             source={item.image}
                             style={styles.illustration}
-                            resizeMode="contain"
+                            resizeMode="cover"
                         />
                     </View>
                 </View>
@@ -180,7 +180,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.xxl,
+        // paddingHorizontal: spacing.xxl,
+        // borderWidth: 1,
+        // borderColor: 'blue'
+
     },
 
     slideContent: {
@@ -189,27 +192,34 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'space-between',
         paddingTop: spacing.md,
+        // borderWidth: 1,
+        // borderColor: "red"
     },
 
     textSection: {
         alignItems: 'flex-start',
         width: '100%',
+        // borderWidth: 1,
+        // borderColor: 'black',
+        paddingHorizontal: spacing.xxl,
+        // marginBottom: spacing.xxl,
     },
 
     accentLine: {
-        width: 32,
+        width: 76,
         height: 4,
         borderRadius: 2,
         backgroundColor: colors.primary,
-        marginBottom: spacing.md,
+        marginBottom: spacing.xs,
     },
 
     title: {
         ...typography.heading,
         color: colors.textPrimary,
-        fontSize: 26,
+        fontSize: 30,
         lineHeight: 34,
-        marginBottom: spacing.sm,
+        marginTop: spacing.xl,
+        marginBottom: spacing.md,
     },
 
     titleHighlight: {
@@ -220,7 +230,7 @@ const styles = StyleSheet.create({
     description: {
         ...typography.body,
         color: colors.textSecondary,
-        fontSize: 15,
+        fontSize: 16,
         lineHeight: 22,
     },
 
@@ -229,6 +239,8 @@ const styles = StyleSheet.create({
         // alignItems: 'center',
         // justifyContent: 'center',
         marginVertical: spacing.md,
+        // borderWidth: 1,
+        // borderColor: "red"
     },
 
     illustration: {

@@ -46,7 +46,7 @@ export const ONBOARDING_DATA: OnboardingSlideItem[] = [
         titleHighlight: 'Always',
         titleSuffix: '',
         description:
-            'Get important updates, team announcements, and upcoming events in real-time.',
+            'Get important updates, \nteam announcements, and upcoming \nevents in real-time.',
         image: require('../../assets/images/Onboarding3.png'),
         showLogo: false,
         hasAccentLine: true,

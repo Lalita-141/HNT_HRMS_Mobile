@@ -21,12 +21,6 @@ const OnboardingHeader = ({
 }: OnboardingHeaderProps) => {
     return (
         <View style={styles.container}>
-            <View style={styles.leftContainer}>
-                {showLogo && (
-                    <Logo width={200} />
-                )}
-            </View>
-
             <Pressable
                 onPress={onSkip}
                 hitSlop={{ top: 12, bottom: 12, left: 16, right: 16 }}
@@ -38,30 +32,38 @@ const OnboardingHeader = ({
                 ]}>
                 <Text style={styles.skipText}>Skip</Text>
             </Pressable>
+            {showLogo && (
+                <View style={styles.logoContainer}>
+                    <Logo width={240} />
+                </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
         paddingHorizontal: spacing.xl,
         paddingTop: spacing.sm,
-        paddingBottom: spacing.sm,
-        minHeight: 48,
         zIndex: 10,
     },
 
-    leftContainer: {
-        flex: 1,
-        justifyContent: 'center',
+    logoContainer: {
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        marginTop: spacing.md,
+        marginBottom: spacing.sm,
     },
 
     skipButton: {
+        width: '100%',
         paddingVertical: spacing.xs,
         paddingHorizontal: spacing.sm,
+        justifyContent: "flex-start",
+        alignItems: "flex-end",
+        // borderWidth: 1,
+        // borderColor: 'black',
     },
 
     skipPressed: {
