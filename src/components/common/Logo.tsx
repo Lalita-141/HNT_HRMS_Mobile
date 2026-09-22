@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
-import LogoSvg from '../../assets/logo-svg.svg';
+import LogoSvg from '../../assets/svg/logo-svg.svg';
 
 interface LogoProps {
     width?: number;

@@ -2,9 +2,9 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, View } from 'react-native';
 
-import SplashScreen from '../screens/splash/SplashScreen';
-import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
-import LoginScreen from '../screens/auth/LoginScreen';
+import SplashScreen from '../features/splash/SplashScreen';
+import OnboardingScreen from '../features/onboarding/OnboardingScreen';
+import LoginScreen from '../features/auth/screens/LoginScreen';
 
 export type AuthStackParamList = {
     Splash: undefined;

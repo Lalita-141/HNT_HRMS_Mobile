@@ -6,16 +6,16 @@ import {
     View,
 } from 'react-native';
 
-import AppScreen from '../../components/common/AppScreen';
-import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
-import { typography } from '../../theme/typography';
+import AppScreen from '../../../components/common/AppScreen';
+import { colors } from '../../../theme/colors';
+import { spacing } from '../../../theme/spacing';
+import { typography } from '../../../theme/typography';
 
-import AppInput from '../../components/inputs/AppInput';
-import PrimaryButton from '../../components/buttons/PrimaryButton';
-import Divider from '../../components/common/Divider';
-import BiometricButton from '../../components/buttons/BiometricButton';
-import LoginHeader from '../../components/common/LoginHeader';
+import AppInput from '../../../components/inputs/AppInput';
+import PrimaryButton from '../../../components/buttons/PrimaryButton';
+import Divider from '../../../components/common/Divider';
+import BiometricButton from '../../../components/buttons/BiometricButton';
+import LoginHeader from '../../../components/common/LoginHeader';
 
 const LoginScreen = () => {
     return (
