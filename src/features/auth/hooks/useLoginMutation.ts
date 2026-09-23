@@ -1,33 +1,28 @@
-import { ApiError } from "../../../services/api/apiClient"
-import { LoginRequestBody, LoginResponse } from "../type"
+import { ApiError } from "../../../services/api/apiClient";
+import { LoginRequestBody, LoginResponse } from "../type";
 import { useMutation } from '@tanstack/react-query';
 import { authService } from "../services/authService";
-import { setAuthToken, setRefreshToken, setUserName, setUserRoles } from "../../../services/storage/authStorage";
+import { useAuth } from "../../../context/AuthContext";
 
 export const useLoginMutation = () => {
+    const { login } = useAuth();
+
     return useMutation<LoginResponse, ApiError, LoginRequestBody>({
         mutationFn: (payload: LoginRequestBody) => authService.login(payload),
 
         onSuccess: (response: LoginResponse) => {
-            if (response?.SUCCESS) {
-                setAuthToken(response.DATA.token)
-            }
-            if (response.DATA?.refreshToken) {
-                setRefreshToken(response.DATA.refreshToken)
-            }
-            if (response.DATA?.roles) {
-                setUserRoles(response.DATA.roles)
-                console.log('Login successful for role:', response.DATA.roles)
-            }
-            if (response.DATA?.username) {
-                setUserName(response.DATA.username)
-                console.log('Login successful for username:', response.DATA.username)
-            }
+            if (response?.SUCCESS && response.DATA?.token) {
+                const token = response.DATA.token;
+                const roles = response.DATA.roles || ['EMPLOYEE'];
+                const username = response.DATA.username || 'Ismail Akhtar';
+                const refreshToken = response.DATA.refreshToken;
 
-
+                login(token, roles, username, refreshToken);
+                console.log('Login successful for user:', username, 'with roles:', roles);
+            }
         },
         onError: (error: ApiError) => {
-            console.error('Login failed:', error?.message, error.status)
+            console.error('Login failed:', error?.message, error.status);
         }
-    })
-}
+    });
+};

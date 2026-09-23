@@ -2,7 +2,8 @@ import { getStorage } from './storage';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
-const USER_DATA_KEY = 'user_data';
+const USER_ROLES_KEY = 'user_roles';
+const USER_NAME_KEY = 'user_name';
 
 export const getAuthToken = (): string | null => {
     try {
@@ -27,9 +28,6 @@ export const getRefreshToken = (): string | null => {
     }
 };
 
-
-
-
 export const setRefreshToken = (token: string): void => {
     const storage = getStorage();
     storage.set(REFRESH_TOKEN_KEY, token);
@@ -40,29 +38,39 @@ export const clearAuthTokens = (): void => {
         const storage = getStorage();
         storage.delete(AUTH_TOKEN_KEY);
         storage.delete(REFRESH_TOKEN_KEY);
-        storage.delete(USER_DATA_KEY);
+        storage.delete(USER_ROLES_KEY);
+        storage.delete(USER_NAME_KEY);
     } catch {
         // storage may not be initialized
     }
 };
 
-
-export const setUserRoles = (role: string[]): void => {
+export const setUserRoles = (roles: string[]): void => {
     const storage = getStorage();
-    storage.set(USER_DATA_KEY, JSON.stringify(role));
+    storage.set(USER_ROLES_KEY, JSON.stringify(roles));
 };
 
-export const getUserRoles = (): string[] | null => {
-    const storage = getStorage();
-    return JSON.parse(storage.getString(USER_DATA_KEY) ?? '[]');
+export const getUserRoles = (): string[] => {
+    try {
+        const storage = getStorage();
+        const data = storage.getString(USER_ROLES_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch {
+        return [];
+    }
 };
 
-export const setUserName = (userId: string): void => {
+export const setUserName = (userName: string): void => {
     const storage = getStorage();
-    storage.set(USER_DATA_KEY, userId);
+    storage.set(USER_NAME_KEY, userName);
 };
 
 export const getUserName = (): string | null => {
-    const storage = getStorage();
-    return storage.getString(USER_DATA_KEY) ?? null;
+    try {
+        const storage = getStorage();
+        return storage.getString(USER_NAME_KEY) ?? null;
+    } catch {
+        return null;
+    }
 };
+

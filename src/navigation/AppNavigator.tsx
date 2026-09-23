@@ -1,8 +1,11 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import MainTabNavigator from './MainTabNavigator';
+import ManagerTeamScreen from '../features/manager/screens/ManagerTeamScreen';
+import AdminDashboardScreen from '../features/admin/screens/AdminDashboardScreen';
 
 export type AppStackParamList = {
-    Employee: undefined;
+    MainTabs: undefined;
     Manager: undefined;
     Admin: undefined;
     SuperAdmin: undefined;
@@ -10,16 +13,36 @@ export type AppStackParamList = {
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
-const AppNavigator = () => {
+type ManagerScreenProps = NativeStackScreenProps<AppStackParamList, 'Manager'>;
+
+const ManagerScreen = ({ navigation }: ManagerScreenProps) => {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Employee" component={EmployeePlaceholder} />
-        </Stack.Navigator>
+        <ManagerTeamScreen
+            onSwitchToWorkspace={() => navigation.navigate('MainTabs')}
+        />
     );
 };
 
-const EmployeePlaceholder = () => {
-    return null;
+const AppNavigator = () => {
+    return (
+        <Stack.Navigator
+            initialRouteName="MainTabs"
+            screenOptions={{
+                headerShown: false,
+                animation: 'fade',
+            }}>
+            <Stack.Screen name="MainTabs">
+                {({ navigation }) => (
+                    <MainTabNavigator
+                        onSwitchToTeam={() => navigation.navigate('Manager')}
+                    />
+                )}
+            </Stack.Screen>
+            <Stack.Screen name="Manager" component={ManagerScreen} />
+            <Stack.Screen name="Admin" component={AdminDashboardScreen} />
+            <Stack.Screen name="SuperAdmin" component={AdminDashboardScreen} />
+        </Stack.Navigator>
+    );
 };
 
 export default AppNavigator;

@@ -1,13 +1,11 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-
+import { useAuth } from '../context/AuthContext';
 import AuthNavigator from './AuthNavigator';
 import AppNavigator from './AppNavigator';
 
 const RootNavigator = () => {
-    // Temporary value.
-    // Later this will come from our authentication store.
-    const isAuthenticated = false;
+    const { isAuthenticated } = useAuth();
 
     return (
         <NavigationContainer>

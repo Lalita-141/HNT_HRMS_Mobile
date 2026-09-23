@@ -1,21 +1,52 @@
 export const colors = {
-    primary: '#1E854E',
+    // Brand
+    primary: '#2A9246',
+    primaryDark: '#1E854E',
+    primaryLight: '#EDFBF4',
+    primarySoft: '#EEF9F5',
 
+    // Neutrals
     white: '#FFFFFF',
     black: '#000000',
+    neutral950: '#0F172A',
+    neutral900: '#1E293B',
+    neutral800: '#475569',
+    neutral600: '#64748B',
+    neutral400: '#94A3B8',
+    neutral300: '#D9DFE5',
+    neutral100: '#F1F5F9',
+    neutral50: '#F8FAFC',
 
-    textPrimary: '#333333',
-    textSecondary: '#11111199',
-    textMuted: '#999999',
+    // Text aliases
+    textPrimary: '#0F172A',
+    textSecondary: '#475569',
+    textMuted: '#64748B',
+    textPlaceholder: '#94A3B8',
 
-    border: '#D5D5D5',
-
+    // Surfaces & Borders
+    border: '#D9DFE5',
+    borderLight: '#E2E8F0',
     background: '#FFFFFF',
-    surface: '#F7F9F8',
+    surface: '#F8FAFC',
+    surfaceSubtle: '#F1F5F9',
 
-    success: '#198754',
-    error: '#D32F2F',
-    warning: '#F59E0B',
+    // Semantic Status
+    success: '#16A34A',
+    successLight: '#DCFCE7',
+    successDark: '#15803D',
+    error: '#E11D48',
+    errorLight: '#FFE4E6',
+    warning: '#FE7717',
+    warningLight: '#FEF3C7',
+    info: '#1D68ED',
+    infoLight: '#EFF6FF',
 
-    primaryLight: '#EEF9F5',
+    // Leave Types / Category Accents
+    leaveEL: '#059669', // Earned Leave (Emerald)
+    leaveCL: '#1D68ED', // Casual Leave (Blue)
+    leaveSL: '#FACC15', // Sick Leave (Yellow)
+    leaveML: '#EC4899', // Maternity Leave (Pink)
+    leavePL: '#8B5CF6', // Paternity Leave (Purple)
+    leaveCO: '#FE7717', // Comp Off (Orange)
+    leaveWFH: '#4AA3FE', // WFH (Light Blue)
 };

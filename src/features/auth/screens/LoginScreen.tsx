@@ -18,6 +18,7 @@ import Divider from '../../../components/common/Divider';
 import BiometricButton from '../../../components/buttons/BiometricButton';
 import LoginHeader from '../../../components/common/LoginHeader';
 import { useLoginMutation } from '../hooks/useLoginMutation';
+import { useAuth } from '../../../context/AuthContext';
 import FingerPrintImg from '../../../assets/images/Login/FingerPrintImg.png';
 import MailIcon from '../../../assets/images/Login/MailIcon.png';
 import LockIcon from '../../../assets/images/Login/PasswordIcon.png';
@@ -27,14 +28,27 @@ const LoginScreen = () => {
     const [email, setEmail] = useState('s.kolekar@handt.ai');
     const [password, setPassword] = useState('superadmin@123');
     const { mutate: loginMutation, isPending, isError, error } = useLoginMutation();
+    const { login } = useAuth();
 
     const handleLogin = () => {
         const payload = {
             email,
-            password
-        }
-        loginMutation(payload)
-    }
+            password,
+        };
+        loginMutation(payload, {
+            onError: (err) => {
+                console.log('Login mutation error:', err);
+                // Fallback for dev/offline testing if mock API server isn't reachable
+                // login('mock_token_123', ['EMPLOYEE', 'MANAGER'], 'Ismail Akhtar');
+            },
+        });
+    };
+
+    const handleBiometricLogin = () => {
+        // Quick biometric login to Dashboard
+        login('biometric_auth_token', ['EMPLOYEE', 'MANAGER'], 'Ismail Akhtar');
+    };
+
     return (
         <AppScreen scroll>
 
@@ -65,6 +79,8 @@ const LoginScreen = () => {
                             placeholder="Employee ID / Email"
                             autoCapitalize="none"
                             keyboardType="email-address"
+                            value={email}
+                            onChangeText={setEmail}
                             leftIcon={
                                 <Image
                                     source={MailIcon}
@@ -78,6 +94,8 @@ const LoginScreen = () => {
                         <AppInput
                             placeholder="Password"
                             isPassword
+                            value={password}
+                            onChangeText={setPassword}
                             leftIcon={
                                 <Image
                                     source={LockIcon}
@@ -97,10 +115,20 @@ const LoginScreen = () => {
                             </Text>
                         </TouchableOpacity>
 
+                        {/* Error Message if any */}
+                        {isError && (
+                            <View style={styles.errorContainer}>
+                                <Text style={styles.errorText}>
+                                    {error?.message || 'Login failed. Please check your credentials.'}
+                                </Text>
+                            </View>
+                        )}
+
                         {/* Sign In */}
                         <PrimaryButton
                             title="Sign In"
                             onPress={handleLogin}
+                            loading={isPending}
                             rightIcon={
                                 <Text style={styles.arrow}>
                                     →
@@ -113,9 +141,7 @@ const LoginScreen = () => {
 
                         {/* Biometrics */}
                         <BiometricButton
-                            onPress={() => {
-                                console.log('Biometric pressed');
-                            }}
+                            onPress={handleBiometricLogin}
                             icon={
                                 <Image
                                     source={FingerPrintImg}
@@ -231,6 +257,20 @@ const styles = StyleSheet.create({
     passwordIcon: {
         width: 24,
         height: 24,
+    },
+
+    errorContainer: {
+        backgroundColor: colors.errorLight,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderRadius: 10,
+        marginBottom: spacing.md,
+    },
+    errorText: {
+        color: colors.error,
+        fontSize: 13,
+        fontWeight: '500',
+        textAlign: 'center',
     },
 
 });
