@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    Image,
     Pressable,
     StyleSheet,
     Text,
@@ -34,11 +35,7 @@ const BiometricButton = ({
                 disabled && styles.disabled,
             ]}>
             <View style={styles.circle}>
-                {icon || (
-                    <Text style={styles.placeholderIcon}>
-                        ◉
-                    </Text>
-                )}
+                {icon}
             </View>
 
             <Text style={styles.label}>
@@ -55,8 +52,8 @@ const styles = StyleSheet.create({
     },
 
     circle: {
-        width: 96,
-        height: 96,
+        width: 76,
+        height: 76,
         borderRadius: 48,
         backgroundColor: colors.primaryLight,
 
@@ -64,9 +61,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    placeholderIcon: {
-        fontSize: 38,
-        color: colors.primary,
+    icon: {
+        width: 48,
+        height: 48,
+
     },
 
     label: {

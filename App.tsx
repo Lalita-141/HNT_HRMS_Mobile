@@ -1,49 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { getStorage } from './src/services/storage/storage';
+import { useAppBootstrap } from './src/hooks/useAppBootstrap';
+import { AppProviders } from './src/providers/AppProviders';
 import RootNavigator from './src/navigation/RootNavigator';
-import { initStorage } from './src/services/storage/initStorage';
 
 const App = () => {
-  const [storageReady, setStorageReady] = useState(false);
+  const { isReady } = useAppBootstrap();
 
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        await initStorage();
-        const storage = getStorage();
-
-        storage.set('test_key', 'HRMS working');
-
-        console.log(
-          'MMKV TEST:',
-          storage.getString('test_key'),
-        );
-        setStorageReady(true);
-      } catch (error) {
-        console.error(
-          'Storage initialization failed:',
-          error,
-        );
-      }
-    };
-
-    initialize();
-  }, []);
-
-  if (!storageReady) {
+  if (!isReady) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.loader}>
         <ActivityIndicator size="large" color="#0066CC" />
       </View>
     );
   }
 
-  return <RootNavigator />;
+  return (
+    <AppProviders>
+      <RootNavigator />
+    </AppProviders>
+  );
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

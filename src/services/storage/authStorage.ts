@@ -27,6 +27,9 @@ export const getRefreshToken = (): string | null => {
     }
 };
 
+
+
+
 export const setRefreshToken = (token: string): void => {
     const storage = getStorage();
     storage.set(REFRESH_TOKEN_KEY, token);
@@ -41,4 +44,25 @@ export const clearAuthTokens = (): void => {
     } catch {
         // storage may not be initialized
     }
+};
+
+
+export const setUserRoles = (role: string[]): void => {
+    const storage = getStorage();
+    storage.set(USER_DATA_KEY, JSON.stringify(role));
+};
+
+export const getUserRoles = (): string[] | null => {
+    const storage = getStorage();
+    return JSON.parse(storage.getString(USER_DATA_KEY) ?? '[]');
+};
+
+export const setUserName = (userId: string): void => {
+    const storage = getStorage();
+    storage.set(USER_DATA_KEY, userId);
+};
+
+export const getUserName = (): string | null => {
+    const storage = getStorage();
+    return storage.getString(USER_DATA_KEY) ?? null;
 };

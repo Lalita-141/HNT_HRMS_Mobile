@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -16,12 +17,38 @@ import PrimaryButton from '../../../components/buttons/PrimaryButton';
 import Divider from '../../../components/common/Divider';
 import BiometricButton from '../../../components/buttons/BiometricButton';
 import LoginHeader from '../../../components/common/LoginHeader';
+import { useLoginMutation } from '../hooks/useLoginMutation';
+import FingerPrintImg from '../../../assets/images/Login/FingerPrintImg.png';
+import MailIcon from '../../../assets/images/Login/MailIcon.png';
+import LockIcon from '../../../assets/images/Login/PasswordIcon.png';
+import PageBottomBg from '../../../assets/images/PageBottombg.png';
 
 const LoginScreen = () => {
+    const [email, setEmail] = useState('s.kolekar@handt.ai');
+    const [password, setPassword] = useState('superadmin@123');
+    const { mutate: loginMutation, isPending, isError, error } = useLoginMutation();
+
+    const handleLogin = () => {
+        const payload = {
+            email,
+            password
+        }
+        loginMutation(payload)
+    }
     return (
         <AppScreen scroll>
 
             <View style={styles.container}>
+                {/* ============================= */}
+                {/* Bottom Decorative Background  */}
+                {/* ============================= */}
+                <Image
+                    source={PageBottomBg}
+                    style={styles.bottomBackground}
+                    resizeMode="stretch"
+                    pointerEvents="none"
+                />
+
                 {/* ============================= */}
                 {/* Login Content */}
                 {/* ============================= */}
@@ -38,14 +65,26 @@ const LoginScreen = () => {
                             placeholder="Employee ID / Email"
                             autoCapitalize="none"
                             keyboardType="email-address"
-                            leftIcon={<Text>✉</Text>}
+                            leftIcon={
+                                <Image
+                                    source={MailIcon}
+                                    style={styles.emailIcon}
+                                    resizeMode="contain"
+                                />
+                            }
                         />
 
                         {/* Password */}
                         <AppInput
                             placeholder="Password"
                             isPassword
-                            leftIcon={<Text>🔒</Text>}
+                            leftIcon={
+                                <Image
+                                    source={LockIcon}
+                                    style={styles.passwordIcon}
+                                    resizeMode="contain"
+                                />
+                            }
                         />
 
                         {/* Forgot Password */}
@@ -61,9 +100,7 @@ const LoginScreen = () => {
                         {/* Sign In */}
                         <PrimaryButton
                             title="Sign In"
-                            onPress={() => {
-                                console.log('Sign In pressed');
-                            }}
+                            onPress={handleLogin}
                             rightIcon={
                                 <Text style={styles.arrow}>
                                     →
@@ -79,7 +116,13 @@ const LoginScreen = () => {
                             onPress={() => {
                                 console.log('Biometric pressed');
                             }}
-                            label="Use Biometrics"
+                            icon={
+                                <Image
+                                    source={FingerPrintImg}
+                                    style={styles.biometricIcon}
+                                    resizeMode="contain"
+                                />
+                            }
                         />
 
                     </View>
@@ -104,11 +147,25 @@ const styles = StyleSheet.create({
     },
 
     /**
+     * Bottom decorative curved background
+     */
+    bottomBackground: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        height: 100,
+        zIndex: 0,
+    },
+
+    /**
      * Main content wrapper
      */
     wrapper: {
         flexGrow: 1,
         width: '100%',
+        justifyContent: 'center',
         alignItems: 'center',
 
         /*
@@ -157,6 +214,23 @@ const styles = StyleSheet.create({
     arrow: {
         color: colors.white,
         fontSize: 20,
+    },
+
+    /**
+     * Biometric icon inside button circle
+     */
+    biometricIcon: {
+        width: 64,
+        height: 64,
+    },
+
+    emailIcon: {
+        width: 24,
+        height: 24,
+    },
+    passwordIcon: {
+        width: 24,
+        height: 24,
     },
 
 });
