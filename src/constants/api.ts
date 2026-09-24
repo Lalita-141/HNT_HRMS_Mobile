@@ -3,7 +3,7 @@ import { BASE_URL } from "../config/environments";
 export const API = {
     AUTH: {
         LOGIN: `${BASE_URL}/auth/login`,
-        REFRESH: `${BASE_URL}/auth/refresh`,
+        REFRESH: `${BASE_URL}/auth/refresh-token`,
         LOGOUT: `${BASE_URL}/auth/logout`,
         FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,
     },

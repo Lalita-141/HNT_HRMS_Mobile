@@ -92,20 +92,23 @@ const AppDrawerModal: React.FC<AppDrawerModalProps> = ({
                             </View>
                             <View style={styles.userDetails}>
                                 <Text style={styles.userNameText} numberOfLines={1}>
-                                    {userName || 'Ismail Akhtar'}
+                                    {userName || 'Sampat Kolekar'}
                                 </Text>
                                 <View style={styles.roleBadge}>
                                     <Text style={styles.roleBadgeText}>
-                                        {userRoles.includes('ADMIN') || userRoles.includes('SUPERADMIN')
+                                        {userRoles.some(r => r.toUpperCase().includes('SUPER'))
                                             ? 'Super Admin'
-                                            : userRoles.includes('MANAGER')
+                                            : userRoles.some(r => r.toUpperCase().includes('ADMIN'))
+                                            ? 'Admin'
+                                            : userRoles.some(r => r.toUpperCase().includes('MANAGER'))
                                             ? 'Team Manager'
-                                            : 'Employee'}
+                                            : userRoles[0] || 'Employee'}
                                     </Text>
                                 </View>
                             </View>
                         </View>
                     </View>
+
 
                     {/* Navigation Items / Role Switching */}
                     <View style={styles.menuList}>

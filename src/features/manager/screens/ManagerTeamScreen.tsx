@@ -15,6 +15,9 @@ import TeamAttendanceRow from '../../../components/cards/TeamAttendanceRow';
 import PeopleMomentsCard from '../../../components/cards/PeopleMomentsCard';
 import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBar';
 
+import { useAuth } from '../../../context/AuthContext';
+import { useDrawer } from '../../../context/DrawerContext';
+
 interface ManagerTeamScreenProps {
     onSwitchToWorkspace?: () => void;
     onMenuPress?: () => void;
@@ -26,6 +29,8 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
 }) => {
     const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>('team');
     const [activeTab, setActiveTab] = useState<TabKey>('Home');
+    const { userName } = useAuth();
+    const { openDrawer } = useDrawer();
 
     const handleToggleWorkspace = (mode: WorkspaceMode) => {
         setWorkspaceMode(mode);
@@ -34,15 +39,23 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
         }
     };
 
+    const handleMenuPress = () => {
+        if (onMenuPress) {
+            onMenuPress();
+        } else {
+            openDrawer('Manager');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeArea} edges={['top']}>
             <View style={styles.container}>
                 {/* Global Authenticated Header */}
                 <DashboardHeader
-                    userName="Ismail Akhtar"
+                    userName={userName || 'Sampat Kolekar'}
                     greeting="Good Morning,"
                     notificationCount={1}
-                    onMenuPress={onMenuPress}
+                    onMenuPress={handleMenuPress}
                 />
 
                 {/* Main Scrollable Content */}

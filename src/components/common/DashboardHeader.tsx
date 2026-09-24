@@ -12,6 +12,8 @@ import { typography } from '../../theme/typography';
 import { BellIcon, MenuIcon } from '../icons/SvgIcons';
 import SmallLogoSvg from '../../assets/svg/SmallLogo.svg';
 
+import { useDrawer } from '../../context/DrawerContext';
+
 interface DashboardHeaderProps {
     userName?: string;
     greeting?: string;
@@ -33,11 +35,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     onAvatarPress,
     showLogo = true,
 }) => {
+    const { openDrawer } = useDrawer();
+
+    const handleMenuPress = () => {
+        if (onMenuPress) {
+            onMenuPress();
+        } else {
+            openDrawer();
+        }
+    };
+
     return (
         <View style={styles.container}>
             {/* Left: Drawer Menu Icon */}
             <TouchableOpacity
-                onPress={onMenuPress}
+                onPress={handleMenuPress}
                 style={styles.iconButton}
                 activeOpacity={0.7}
                 accessibilityLabel="Open Menu">

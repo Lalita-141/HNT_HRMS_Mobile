@@ -576,6 +576,67 @@ export const MyTeamToggleIcon: React.FC<IconProps> = ({ size = 18, color = '#FFF
     </Svg>
 );
 
+export const FingerprintIcon: React.FC<IconProps> = ({ size = 20, color = '#2563EB' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path
+            d="M12 2C8.13 2 5 5.13 5 9C5 10.3 5.35 11.51 5.96 12.56L7.43 11.09C7.16 10.45 7 9.74 7 9C7 6.24 9.24 4 12 4C14.76 4 17 6.24 17 9C17 9.74 16.84 10.45 16.57 11.09L18.04 12.56C18.65 11.51 19 10.3 19 9C19 5.13 15.87 2 12 2Z"
+            fill={color}
+        />
+        <Path
+            d="M12 6C10.34 6 9 7.34 9 9V14.5C9 15.33 9.67 16 10.5 16C11.33 16 12 15.33 12 14.5V9C12 9 12 8 12 8C12 8 12 9 12 9V14.5C12 16.99 9.99 19 7.5 19C7.03 19 6.57 18.93 6.14 18.79L4.65 20.28C5.52 20.74 6.48 21 7.5 21C11.09 21 14 18.09 14 14.5V9C14 7.9 13.1 7 12 7C10.9 7 10 7.9 10 9V14.5C10 14.78 10.22 15 10.5 15C10.78 15 11 14.78 11 14.5V9C11 8.45 11.45 8 12 8C12.55 8 13 8.45 13 9V14.5C13 15.88 11.88 17 10.5 17C9.12 17 8 15.88 8 14.5V9C8 6.79 9.79 5 12 5C14.21 5 16 6.79 16 9V14.5C16 15.7 15.42 16.76 14.53 17.43L15.95 18.85C17.21 17.84 18 16.27 18 14.5V9C18 5.69 15.31 3 12 3C8.69 3 6 5.69 6 9C6 10.79 6.79 12.39 8.05 13.5L9.46 12.09C8.56 11.3 8 10.22 8 9C8 6.79 9.79 5 12 5Z"
+            fill={color}
+        />
+    </Svg>
+);
+
+export const FaceIdIcon: React.FC<IconProps> = ({ size = 20, color = '#2563EB' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path
+            d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17"
+            stroke={color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <Circle cx="9" cy="9" r="1.2" fill={color} />
+        <Circle cx="15" cy="9" r="1.2" fill={color} />
+        <Path
+            d="M12 11V13.5C12 14 11.5 14.5 11 14.5"
+            stroke={color}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <Path
+            d="M8.5 17C9.5 18 10.5 18.5 12 18.5C13.5 18.5 14.5 18 15.5 17"
+            stroke={color}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+export const ShieldSecurityIcon: React.FC<IconProps> = ({ size = 20, color = '#0284C7' }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <Path
+            d="M12 22S4 18 4 12V5L12 2L20 5V12C20 18 12 22 12 22Z"
+            stroke={color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <Path
+            d="M9 12L11 14L15 10"
+            stroke={color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </Svg>
+);
+
+
 
 
 

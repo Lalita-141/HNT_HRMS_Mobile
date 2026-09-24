@@ -1,16 +1,22 @@
-import { getAuthToken } from '../storage/tokenStorage';
+import { API } from '../../constants/api';
+import {
+    clearAuthTokens,
+    getAuthToken,
+    getRefreshToken,
+    setAuthToken,
+    setRefreshToken,
+} from '../storage/authStorage';
+import { BiometricService } from '../biometric/biometricService';
 
 export interface ApiOptions {
     params?: Record<
         string,
         string | number | boolean | null | undefined
     >;
-
     body?: unknown;
-
     headers?: Record<string, string>;
-
     timeout?: number;
+    _retry?: boolean;
 }
 
 export class ApiError extends Error {
@@ -30,23 +36,80 @@ export class ApiError extends Error {
     }
 }
 
+// Global locking & queue to prevent duplicate concurrent refresh calls
+let isRefreshing = false;
+let failedQueue: Array<{
+    resolve: (token: string) => void;
+    reject: (error: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else if (token) {
+            prom.resolve(token);
+        }
+    });
+    failedQueue = [];
+};
+
 /**
- * Converts API URL + query parameters into
- * a final URL.
- *
- * Example:
- *
- * API.EMPLOYEE.ATTENDANCE
- *
- * + params:
- * {
- *   page: 1,
- *   limit: 20
- * }
- *
- * becomes:
- *
- * https://dev-api.com/employee/attendance?page=1&limit=20
+ * Calls POST /auth/refresh-token with { refreshToken }
+ */
+const executeRefreshToken = async (): Promise<string | null> => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+        throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(API.AUTH.REFRESH, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Refresh token failed with status ${response.status}`);
+    }
+
+    const json = await response.json();
+
+    if (json?.SUCCESS && json?.DATA) {
+        const newAccessToken = json.DATA.accessToken || json.DATA.token;
+        const newRefreshToken = json.DATA.refreshToken;
+
+        if (newAccessToken) {
+            // 1. Update MMKV local storage
+            setAuthToken(newAccessToken);
+            if (newRefreshToken) {
+                setRefreshToken(newRefreshToken);
+            }
+
+            // 2. Also update hardware-backed Biometric Keychain if enrolled
+            const hasBiometrics = await BiometricService.hasSavedCredentials();
+            if (hasBiometrics) {
+                await BiometricService.saveBiometricCredentials(
+                    'user',
+                    JSON.stringify({
+                        token: newAccessToken,
+                        refreshToken: newRefreshToken || refreshToken,
+                    })
+                );
+            }
+
+            return newAccessToken;
+        }
+    }
+
+    throw new Error('Invalid refresh token response');
+};
+
+/**
+ * Converts API URL + query parameters into a final URL.
  */
 const buildUrl = (
     url: string,
@@ -58,36 +121,22 @@ const buildUrl = (
 
     const queryParams = new URLSearchParams();
 
-    Object.entries(params).forEach(
-        ([key, value]) => {
-            if (
-                value !== undefined &&
-                value !== null
-            ) {
-                queryParams.append(
-                    key,
-                    String(value),
-                );
-            }
-        },
-    );
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+            queryParams.append(key, String(value));
+        }
+    });
 
-    const queryString =
-        queryParams.toString();
-
+    const queryString = queryParams.toString();
     if (!queryString) {
         return url;
     }
 
-    return `${url}${url.includes('?') ? '&' : '?'
-        }${queryString}`;
+    return `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
 };
 
 /**
- * Common request function.
- *
- * All GET, POST, PUT, PATCH and DELETE
- * requests eventually come here.
+ * Common request function with silent refresh on 401/403.
  */
 const request = async <T>(
     method: string,
@@ -99,128 +148,120 @@ const request = async <T>(
         body,
         headers: customHeaders,
         timeout = 60000,
+        _retry = false,
     } = options;
 
-    /*
-     * Get logged-in user's token.
-     */
-    const token = await getAuthToken();
+    const token = getAuthToken();
 
-    /*
-     * Default headers.
-     */
     const headers: Record<string, string> = {
         Accept: 'application/json',
         ...customHeaders,
     };
 
-    /*
-     * JSON body.
-     *
-     * Don't set Content-Type manually when
-     * sending FormData.
-     */
-    if (
-        body !== undefined &&
-        !(body instanceof FormData)
-    ) {
-        headers['Content-Type'] =
-            'application/json';
+    if (body !== undefined && !(body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
     }
 
-    /*
-     * Add authentication token if available.
-     */
     if (token) {
-        headers.Authorization =
-            `Bearer ${token}`;
+        headers.Authorization = `Bearer ${token}`;
     }
 
-    /*
-     * Create timeout controller.
-     */
-    const controller =
-        new AbortController();
-
+    const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
     }, timeout);
 
     try {
-        /*
-         * Make API request.
-         */
         const response = await fetch(
             buildUrl(url, params),
             {
                 method,
                 headers,
-
                 body:
                     body instanceof FormData
                         ? body
                         : body !== undefined
                             ? JSON.stringify(body)
                             : undefined,
-
                 signal: controller.signal,
             },
         );
 
-        /*
-         * Request completed, so clear timeout.
-         */
         clearTimeout(timeoutId);
 
-        /*
-         * 204 = No Content
-         */
         if (response.status === 204) {
             return null as T;
         }
 
-        /*
-         * Read response.
-         */
-        let responseData: unknown;
+        // =========================================================================
+        // 🚀 Intercept 401/403, Refresh Token, and Replay Request
+        // =========================================================================
+        const isAuthEndpoint =
+            url.includes('/auth/login') ||
+            url.includes('/auth/refresh') ||
+            url.includes('/auth/refresh-token');
 
-        const contentType =
-            response.headers.get(
-                'content-type',
-            );
+        if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && !_retry) {
+            if (isRefreshing) {
+                // Another request is already refreshing, wait in queue
+                return new Promise<T>((resolve, reject) => {
+                    failedQueue.push({
+                        resolve: (newToken: string) => {
+                            options.headers = {
+                                ...options.headers,
+                                Authorization: `Bearer ${newToken}`,
+                            };
+                            options._retry = true;
+                            resolve(request<T>(method, url, options));
+                        },
+                        reject: (err: unknown) => reject(err),
+                    });
+                });
+            }
 
-        if (
-            contentType?.includes(
-                'application/json',
-            )
-        ) {
-            responseData =
-                await response.json();
-        } else {
-            responseData =
-                await response.text();
+            options._retry = true;
+            isRefreshing = true;
+
+            try {
+                const newAccessToken = await executeRefreshToken();
+                if (newAccessToken) {
+                    processQueue(null, newAccessToken);
+                    // 🔁 Replay original request with fresh token
+                    options.headers = {
+                        ...options.headers,
+                        Authorization: `Bearer ${newAccessToken}`,
+                    };
+                    return await request<T>(method, url, options);
+                }
+            } catch (refreshErr) {
+                processQueue(refreshErr, null);
+                // Refresh failed: Clear session and force re-login
+                clearAuthTokens();
+                await BiometricService.removeBiometrics();
+                throw new ApiError(401, 'Session expired. Please log in again.');
+            } finally {
+                isRefreshing = false;
+            }
         }
 
-        /*
-         * Handle HTTP errors.
-         */
-        if (!response.ok) {
-            let message =
-                `Request failed with status ${response.status}`;
+        let responseData: unknown;
+        const contentType = response.headers.get('content-type');
 
-            if (
-                typeof responseData ===
-                'object' &&
-                responseData !== null &&
-                'message' in responseData
-            ) {
-                message = String(
-                    (
-                        responseData as {
-                            message?: unknown;
-                        }
-                    ).message,
-                );
+        if (contentType?.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            responseData = await response.text();
+        }
+
+        if (!response.ok) {
+            let message = `Request failed with status ${response.status}`;
+
+            if (typeof responseData === 'object' && responseData !== null) {
+                if ('MESSAGE' in responseData) {
+                    message = String((responseData as { MESSAGE?: unknown }).MESSAGE);
+                } else if ('message' in responseData) {
+                    message = String((responseData as { message?: unknown }).message);
+                }
             }
 
             throw new ApiError(
@@ -230,19 +271,10 @@ const request = async <T>(
             );
         }
 
-        /*
-         * Successful response.
-         */
         return responseData as T;
     } catch (error) {
-        /*
-         * Clear timeout if an error occurs.
-         */
         clearTimeout(timeoutId);
 
-        /*
-         * Request timeout.
-         */
         if (
             error instanceof Error &&
             error.name === 'AbortError'
@@ -253,17 +285,10 @@ const request = async <T>(
             );
         }
 
-        /*
-         * If this is already our ApiError,
-         * don't wrap it again.
-         */
         if (error instanceof ApiError) {
             throw error;
         }
 
-        /*
-         * Network error.
-         */
         throw new ApiError(
             0,
             'Network error. Please check your internet connection.',
@@ -272,13 +297,6 @@ const request = async <T>(
     }
 };
 
-/**
- * Public API client.
- *
- * Screens/services use these methods.
- *
- * They don't call fetch() directly.
- */
 export const apiClient = {
     get: <T>(
         url: string,

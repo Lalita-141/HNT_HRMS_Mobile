@@ -20,6 +20,8 @@ import CelebrationBannerCard from '../../../components/cards/CelebrationBannerCa
 import AdminQuickActions from '../../../components/cards/AdminQuickActions';
 import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBar';
 
+import { useDrawer } from '../../../context/DrawerContext';
+
 interface AdminDashboardScreenProps {
     onMenuPress?: () => void;
     onNavigateRole?: (route: RoleScreenTarget) => void;
@@ -29,14 +31,13 @@ interface AdminDashboardScreenProps {
 
 const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
     onMenuPress,
-    onNavigateRole,
     onNotificationPress,
     onAvatarPress,
 }) => {
     const [activeTab, setActiveTab] = useState<TabKey>('Home');
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const { userName } = useAuth();
+    const { openDrawer } = useDrawer();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -50,13 +51,8 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
         if (onMenuPress) {
             onMenuPress();
         } else {
-            setIsDrawerOpen(true);
+            openDrawer('Admin');
         }
-    };
-
-    const handleNavigate = (route: RoleScreenTarget) => {
-        setIsDrawerOpen(false);
-        onNavigateRole?.(route);
     };
 
     const handleQuickAction = (action: { id: string; title: string }) => {
@@ -68,7 +64,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
             <View style={styles.container}>
                 {/* Global Authenticated Header */}
                 <DashboardHeader
-                    userName={userName || 'Ismail Akhtar'}
+                    userName={userName || 'Sampat Kolekar'}
                     greeting="Good Morning,"
                     notificationCount={1}
                     onMenuPress={handleMenuPress}
@@ -133,18 +129,11 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
                     activeTab={activeTab}
                     onSelectTab={setActiveTab}
                 />
-
-                {/* Side Drawer Modal for Role Switching */}
-                <AppDrawerModal
-                    visible={isDrawerOpen}
-                    activeRoute="Admin"
-                    onClose={() => setIsDrawerOpen(false)}
-                    onNavigate={handleNavigate}
-                />
             </View>
         </SafeAreaView>
     );
 };
+
 
 const styles = StyleSheet.create({
     safeArea: {

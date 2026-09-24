@@ -17,6 +17,9 @@ import MyTasksCard from '../../../components/cards/MyTasksCard';
 import CelebrationBannerCard from '../../../components/cards/CelebrationBannerCard';
 import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBar';
 
+import { useAuth } from '../../../context/AuthContext';
+import { useDrawer } from '../../../context/DrawerContext';
+
 interface EmployeeDashboardScreenProps {
     onSwitchToTeam?: () => void;
     onMenuPress?: () => void;
@@ -34,6 +37,8 @@ const EmployeeDashboardScreen: React.FC<EmployeeDashboardScreenProps> = ({
     const [attendanceMethod, setAttendanceMethod] = useState<AttendanceMethod>('biometric');
     const [activeTab, setActiveTab] = useState<TabKey>('Home');
     const [isLocationTrackingOn, setIsLocationTrackingOn] = useState(true);
+    const { userName } = useAuth();
+    const { openDrawer } = useDrawer();
 
     const handleToggleWorkspace = (mode: WorkspaceMode) => {
         setWorkspaceMode(mode);
@@ -47,15 +52,23 @@ const EmployeeDashboardScreen: React.FC<EmployeeDashboardScreenProps> = ({
         setAttendanceMethod(prev => (prev === 'biometric' ? 'location' : 'biometric'));
     };
 
+    const handleMenuPress = () => {
+        if (onMenuPress) {
+            onMenuPress();
+        } else {
+            openDrawer('MainTabs');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.safeArea} edges={['top']}>
             <View style={styles.container}>
                 {/* Global Authenticated Header */}
                 <DashboardHeader
-                    userName="Ismail Akhtar"
+                    userName={userName || 'Sampat Kolekar'}
                     greeting="Good Morning,"
                     notificationCount={1}
-                    onMenuPress={onMenuPress}
+                    onMenuPress={handleMenuPress}
                 />
 
                 {/* Main Scrollable Content */}

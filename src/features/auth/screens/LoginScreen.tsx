@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     Image,
     StyleSheet,
     Text,
@@ -23,6 +24,7 @@ import FingerPrintImg from '../../../assets/images/Login/FingerPrintImg.png';
 import MailIcon from '../../../assets/images/Login/MailIcon.png';
 import LockIcon from '../../../assets/images/Login/PasswordIcon.png';
 import PageBottomBg from '../../../assets/images/PageBottombg.png';
+import { BiometricService } from '../../../services/biometric/biometricService';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('s.kolekar@handt.ai');
@@ -30,24 +32,79 @@ const LoginScreen = () => {
     const { mutate: loginMutation, isPending, isError, error } = useLoginMutation();
     const { login } = useAuth();
 
+    const handleBiometricLogin = async () => {
+        const result = await BiometricService.authenticate();
+        if (result && result.token) {
+            try {
+                // Parse stored session payload
+                const session = JSON.parse(result.token);
+                login(
+                    session.token,
+                    session.roles || ['Super Admin'],
+                    session.username || 'Sampat Kolekar',
+                    session.refreshToken
+                );
+            } catch {
+                login(result.token, ['Super Admin'], result.username);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const checkAndPrompt = async () => {
+            const { isSupported } = await BiometricService.getBiometricType();
+            const hasSaved = await BiometricService.hasSavedCredentials();
+            if (isSupported && hasSaved) {
+                // Auto-prompt on launch if biometrics are enrolled
+                handleBiometricLogin();
+            }
+        };
+        checkAndPrompt();
+    }, []);
+
+    const handleLoginSuccess = async (responseData: any) => {
+        const data = responseData?.DATA;
+        if (!data) return;
+
+        // 1. Set Auth context
+        login(data.token, data.roles, data.username, data.refreshToken, data.email, data.employeeId);
+
+        // 2. Check device biometrics & prompt enrollment if not saved yet
+        const { isSupported, type } = await BiometricService.getBiometricType();
+        const hasSaved = await BiometricService.hasSavedCredentials();
+
+        if (isSupported && !hasSaved) {
+            Alert.alert(
+                `Enable ${type === 'FaceID' ? 'Face ID' : 'Fingerprint'}?`,
+                `Do you want to enable quick biometric login for ${data.username}?`,
+                [
+                    { text: 'Skip', style: 'cancel' },
+                    {
+                        text: 'Enable',
+                        onPress: async () => {
+                            await BiometricService.enableBiometricsAfterLogin(data);
+                        },
+                    },
+                ]
+            );
+        }
+    };
+
     const handleLogin = () => {
         const payload = {
             email,
             password,
         };
         loginMutation(payload, {
+            onSuccess: (response) => {
+                handleLoginSuccess(response);
+            },
             onError: (err) => {
                 console.log('Login mutation error:', err);
-                // Fallback for dev/offline testing if mock API server isn't reachable
-                // login('mock_token_123', ['EMPLOYEE', 'MANAGER'], 'Ismail Akhtar');
             },
         });
     };
 
-    const handleBiometricLogin = () => {
-        // Quick biometric login to Dashboard
-        login('biometric_auth_token', ['EMPLOYEE', 'MANAGER'], 'Ismail Akhtar');
-    };
 
     return (
         <AppScreen scroll>
