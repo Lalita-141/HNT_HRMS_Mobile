@@ -13,6 +13,7 @@ import {
     LocationPinIcon,
     OfficeBuildingIcon,
 } from '../icons/SvgIcons';
+import FingerprintIcon from '../../assets/svg/Dashboard/FingerPrint.svg';
 
 export type AttendanceMethod = 'biometric' | 'location';
 
@@ -52,7 +53,7 @@ const AttendanceSummaryCard: React.FC<AttendanceSummaryCardProps> = ({
                         isBiometric ? styles.biometricCircle : styles.locationCircle,
                     ]}>
                     {isBiometric ? (
-                        <Text style={styles.fingerprintEmoji}>👆</Text>
+                        <FingerprintIcon width={30} height={30} />
                     ) : (
                         <LocationPinIcon size={26} color={colors.info} />
                     )}
@@ -122,7 +123,7 @@ const AttendanceSummaryCard: React.FC<AttendanceSummaryCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.white,
+        backgroundColor: colors.attendanceCardBg,
         borderRadius: 20,
         padding: spacing.lg,
         marginHorizontal: spacing.lg,

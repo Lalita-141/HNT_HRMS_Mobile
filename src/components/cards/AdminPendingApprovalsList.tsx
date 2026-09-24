@@ -7,15 +7,26 @@ import {
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { ChevronRightIcon } from '../icons/SvgIcons';
+import {
+    AirplaneIcon,
+    ChevronRightIcon,
+    ClockIcon,
+    TaskDocIcon,
+} from '../icons/SvgIcons';
 
 export interface AdminApprovalRow {
     id: string;
     count: number;
     title: string;
-    iconEmoji: string;
-    iconColor: string;
+    icon: React.ReactNode;
     bgColor: string;
+}
+
+interface AdminPendingApprovalsListProps {
+    data?: AdminApprovalRow[];
+    totalCount?: number;
+    onViewAllPress?: () => void;
+    onItemPress?: (item: AdminApprovalRow) => void;
 }
 
 const DEFAULT_ADMIN_APPROVALS: AdminApprovalRow[] = [
@@ -23,37 +34,39 @@ const DEFAULT_ADMIN_APPROVALS: AdminApprovalRow[] = [
         id: '1',
         count: 12,
         title: 'Leave Requests',
-        iconEmoji: '📝',
-        iconColor: '#E11D48',
-        bgColor: '#FFE4E6',
+        icon: <TaskDocIcon size={18} color="#E11D48" />,
+        bgColor: '#FFF1F2',
     },
     {
         id: '2',
         count: 3,
         title: 'Regularization',
-        iconEmoji: '⏱️',
-        iconColor: '#1D68ED',
+        icon: <ClockIcon size={18} color="#1D68ED" />,
         bgColor: '#EFF6FF',
     },
     {
         id: '3',
         count: 4,
         title: 'WFH Requests',
-        iconEmoji: '🏠',
-        iconColor: '#8B5CF6',
+        icon: <AirplaneIcon size={18} color="#8B5CF6" />,
         bgColor: '#F5F3FF',
     },
     {
         id: '4',
         count: 2,
         title: 'Comp Off',
-        iconEmoji: '⛱️',
-        iconColor: '#FE7717',
-        bgColor: '#FEF3C7',
+        icon: <TaskDocIcon size={18} color="#3B82F6" />,
+        bgColor: '#EFF6FF',
     },
 ];
 
-const AdminPendingApprovalsList: React.FC = () => {
+
+const AdminPendingApprovalsList: React.FC<AdminPendingApprovalsListProps> = ({
+    data = DEFAULT_ADMIN_APPROVALS,
+    totalCount = 18,
+    onViewAllPress,
+    onItemPress,
+}) => {
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -61,27 +74,28 @@ const AdminPendingApprovalsList: React.FC = () => {
                 <View style={styles.titleWithBadge}>
                     <Text style={styles.sectionTitle}>Pending Approvals</Text>
                     <View style={styles.badge}>
-                        <Text style={styles.badgeText}>16</Text>
+                        <Text style={styles.badgeText}>{totalCount}</Text>
                     </View>
                 </View>
 
-                <TouchableOpacity activeOpacity={0.7}>
+                <TouchableOpacity onPress={onViewAllPress} activeOpacity={0.7}>
                     <Text style={styles.viewAllText}>View All →</Text>
                 </TouchableOpacity>
             </View>
 
             {/* List Card */}
             <View style={styles.cardContainer}>
-                {DEFAULT_ADMIN_APPROVALS.map((item, index) => {
-                    const isLast = index === DEFAULT_ADMIN_APPROVALS.length - 1;
+                {data.map((item, index) => {
+                    const isLast = index === data.length - 1;
 
                     return (
                         <TouchableOpacity
                             key={item.id}
                             style={[styles.row, !isLast && styles.rowBorder]}
+                            onPress={() => onItemPress?.(item)}
                             activeOpacity={0.7}>
                             <View style={[styles.iconWrap, { backgroundColor: item.bgColor }]}>
-                                <Text style={styles.emoji}>{item.iconEmoji}</Text>
+                                {item.icon}
                             </View>
 
                             <View style={styles.info}>
@@ -119,10 +133,10 @@ const styles = StyleSheet.create({
         color: colors.neutral950,
     },
     badge: {
-        backgroundColor: colors.error,
+        backgroundColor: '#FF2D55',
         borderRadius: 10,
-        minWidth: 18,
-        height: 18,
+        minWidth: 20,
+        height: 20,
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 5,
@@ -153,22 +167,19 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.md,
+        paddingVertical: 12,
     },
     rowBorder: {
         borderBottomWidth: 1,
-        borderBottomColor: colors.neutral100,
+        borderBottomColor: '#F1F5F9',
     },
     iconWrap: {
-        width: 38,
-        height: 38,
-        borderRadius: 12,
+        width: 36,
+        height: 36,
+        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: spacing.sm,
-    },
-    emoji: {
-        fontSize: 16,
     },
     info: {
         flex: 1,
@@ -183,9 +194,10 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontSize: 13,
-        fontWeight: '600',
+        fontWeight: '500',
         color: colors.neutral800,
     },
 });
 
-export default AdminPendingApprovalsList;
+export default React.memo(AdminPendingApprovalsList);
+

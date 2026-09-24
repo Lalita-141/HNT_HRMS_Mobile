@@ -7,38 +7,43 @@ import {
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { CalendarIcon, ChevronRightIcon } from '../icons/SvgIcons';
+import { ChevronRightIcon } from '../icons/SvgIcons';
 
 export interface HolidayItem {
     id: string;
+    day: string;
+    month: string;
     name: string;
-    date: string;
     type: string;
 }
 
 interface UpcomingHolidaysCardProps {
     holidays?: HolidayItem[];
     onViewAllPress?: () => void;
+    onHolidayPress?: (holiday: HolidayItem) => void;
 }
 
 const DEFAULT_HOLIDAYS: HolidayItem[] = [
     {
         id: '1',
+        day: '02',
+        month: 'Oct',
         name: 'Gandhi Jayanti',
-        date: '02 Oct, Fri',
         type: 'National Holiday',
     },
     {
         id: '2',
+        day: '12',
+        month: 'Nov',
         name: 'Diwali',
-        date: '12 Nov, Thu',
-        type: 'Gazetted Holiday',
+        type: 'Restricted Holiday',
     },
 ];
 
 const UpcomingHolidaysCard: React.FC<UpcomingHolidaysCardProps> = ({
     holidays = DEFAULT_HOLIDAYS,
     onViewAllPress,
+    onHolidayPress,
 }) => {
     return (
         <View style={styles.container}>
@@ -56,22 +61,30 @@ const UpcomingHolidaysCard: React.FC<UpcomingHolidaysCardProps> = ({
                     const isLast = index === holidays.length - 1;
 
                     return (
-                        <View
+                        <TouchableOpacity
                             key={holiday.id}
-                            style={[styles.holidayRow, !isLast && styles.rowBorder]}>
-                            <View style={styles.iconWrap}>
-                                <CalendarIcon size={18} color={colors.warning} />
+                            style={[styles.holidayRow, !isLast && styles.rowBorder]}
+                            onPress={() => onHolidayPress?.(holiday)}
+                            activeOpacity={0.7}>
+                            {/* Left Date Box */}
+                            <View style={styles.dateBox}>
+                                <Text style={styles.dayText}>{holiday.day}</Text>
+                                <Text style={styles.monthText}>{holiday.month}</Text>
                             </View>
 
+                            {/* Middle Info */}
                             <View style={styles.holidayInfo}>
                                 <Text style={styles.holidayName}>{holiday.name}</Text>
-                                <Text style={styles.holidayDate}>{holiday.date}</Text>
+                                <View style={styles.badgeWrapper}>
+                                    <View style={styles.typeBadge}>
+                                        <Text style={styles.typeBadgeText}>{holiday.type}</Text>
+                                    </View>
+                                </View>
                             </View>
 
-                            <View style={styles.typeBadge}>
-                                <Text style={styles.typeBadgeText}>{holiday.type}</Text>
-                            </View>
-                        </View>
+                            {/* Right Chevron */}
+                            <ChevronRightIcon size={16} color={colors.neutral400} />
+                        </TouchableOpacity>
                     );
                 })}
             </View>
@@ -82,7 +95,7 @@ const UpcomingHolidaysCard: React.FC<UpcomingHolidaysCardProps> = ({
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: spacing.lg,
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
     },
     headerRow: {
         flexDirection: 'row',
@@ -115,20 +128,34 @@ const styles = StyleSheet.create({
     holidayRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.md,
+        paddingVertical: 12,
     },
     rowBorder: {
         borderBottomWidth: 1,
-        borderBottomColor: colors.neutral100,
+        borderBottomColor: '#F1F5F9',
     },
-    iconWrap: {
-        width: 38,
-        height: 38,
+    dateBox: {
+        width: 44,
+        height: 44,
         borderRadius: 12,
-        backgroundColor: colors.warningLight,
+        backgroundColor: '#FFFBEB',
+        borderWidth: 1,
+        borderColor: '#FEF3C7',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: spacing.sm,
+        marginRight: spacing.md,
+    },
+    dayText: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#92400E',
+        lineHeight: 15,
+    },
+    monthText: {
+        fontSize: 9,
+        fontWeight: '600',
+        color: '#B45309',
+        textTransform: 'uppercase',
     },
     holidayInfo: {
         flex: 1,
@@ -137,23 +164,23 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '600',
         color: colors.neutral950,
+        marginBottom: 3,
     },
-    holidayDate: {
-        fontSize: 11,
-        color: colors.neutral600,
-        marginTop: 2,
+    badgeWrapper: {
+        flexDirection: 'row',
     },
     typeBadge: {
-        backgroundColor: colors.surfaceSubtle,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 8,
+        backgroundColor: '#FEF3C7',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 6,
     },
     typeBadgeText: {
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: '600',
-        color: colors.neutral800,
+        color: '#B45309',
     },
 });
 
-export default UpcomingHolidaysCard;
+export default React.memo(UpcomingHolidaysCard);
+

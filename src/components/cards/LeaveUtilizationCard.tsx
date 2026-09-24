@@ -2,68 +2,128 @@ import React from 'react';
 import {
     StyleSheet,
     Text,
+    TouchableOpacity,
     View,
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import {
+    AwardIcon,
+    LeafIcon,
+    PlusCircleIcon,
+    RefreshCcwIcon,
+    UsersGroupIcon,
+} from '../icons/SvgIcons';
 
-interface LeaveProgressItem {
+export interface LeaveOverviewItem {
     id: string;
     label: string;
     code: string;
     used: number;
     total: number;
-    color: string;
+    icon: React.ReactNode;
+    iconBgColor: string;
 }
 
-const DEFAULT_UTILIZATION: LeaveProgressItem[] = [
-    { id: 'el', label: 'Earned Leave', code: 'EL', used: 124, total: 208, color: colors.leaveEL },
-    { id: 'cl', label: 'Casual Leave', code: 'CL', used: 56, total: 80, color: colors.leaveCL },
-    { id: 'sl', label: 'Sick Leave', code: 'SL', used: 32, total: 60, color: colors.leaveSL },
-    { id: 'ml', label: 'Maternity Leave', code: 'ML', used: 18, total: 26, color: colors.leaveML },
-    { id: 'pl', label: 'Paternity Leave', code: 'PL', used: 10, total: 20, color: colors.leavePL },
-    { id: 'co', label: 'Comp Off', code: 'CO', used: 8, total: 15, color: colors.leaveCO },
+interface LeaveUtilizationCardProps {
+    data?: LeaveOverviewItem[];
+    onViewAllPress?: () => void;
+}
+
+const DEFAULT_LEAVE_OVERVIEW: LeaveOverviewItem[] = [
+    {
+        id: 'el',
+        label: 'Earned Leave',
+        code: 'EL',
+        used: 124,
+        total: 208,
+        iconBgColor: '#DCFCE7',
+        icon: <LeafIcon size={16} color="#16A34A" />,
+    },
+    {
+        id: 'cl',
+        label: 'Casual Leave',
+        code: 'CL',
+        used: 56,
+        total: 80,
+        iconBgColor: '#EFF6FF',
+        icon: <RefreshCcwIcon size={16} color="#1D68ED" />,
+    },
+    {
+        id: 'sl',
+        label: 'Sick Leave',
+        code: 'SL',
+        used: 32,
+        total: 60,
+        iconBgColor: '#FFF1F2',
+        icon: <PlusCircleIcon size={16} color="#E11D48" />,
+    },
+    {
+        id: 'ml',
+        label: 'Maternity Leave',
+        code: 'ML',
+        used: 18,
+        total: 26,
+        iconBgColor: '#FEF3C7',
+        icon: <AwardIcon size={16} color="#D97706" />,
+    },
+    {
+        id: 'pl',
+        label: 'Paternity Leave',
+        code: 'PL',
+        used: 10,
+        total: 20,
+        iconBgColor: '#F5F3FF',
+        icon: <UsersGroupIcon size={16} color="#8B5CF6" />,
+    },
+    {
+        id: 'co',
+        label: 'Comp Off',
+        code: 'CO',
+        used: 8,
+        total: 15,
+        iconBgColor: '#FFFBEB',
+        icon: <AwardIcon size={16} color="#F59E0B" />,
+    },
 ];
 
-const LeaveUtilizationCard: React.FC = () => {
+const LeaveUtilizationCard: React.FC<LeaveUtilizationCardProps> = ({
+    data = DEFAULT_LEAVE_OVERVIEW,
+    onViewAllPress,
+}) => {
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.headerRow}>
                 <Text style={styles.sectionTitle}>Leave Overview</Text>
+                <TouchableOpacity onPress={onViewAllPress} activeOpacity={0.7}>
+                    <Text style={styles.viewAllText}>View All →</Text>
+                </TouchableOpacity>
             </View>
 
-            {/* List */}
+            {/* List Card */}
             <View style={styles.card}>
-                {DEFAULT_UTILIZATION.map(item => {
-                    const percent = Math.min(Math.round((item.used / item.total) * 100), 100);
+                {data.map((item, idx) => {
+                    const isLast = idx === data.length - 1;
 
                     return (
-                        <View key={item.id} style={styles.itemRow}>
-                            <View style={styles.labelRow}>
-                                <View style={styles.leftLabel}>
-                                    <View style={[styles.dot, { backgroundColor: item.color }]} />
-                                    <Text style={styles.itemTitle}>
-                                        {item.label} ({item.code})
-                                    </Text>
+                        <View
+                            key={item.id}
+                            style={[styles.itemRow, !isLast && styles.rowBorder]}>
+                            {/* Left: Icon & Label */}
+                            <View style={styles.leftContent}>
+                                <View style={[styles.iconWrap, { backgroundColor: item.iconBgColor }]}>
+                                    {item.icon}
                                 </View>
-                                <Text style={styles.ratioText}>
-                                    <Text style={styles.boldUsed}>{item.used}</Text> / {item.total}
+                                <Text style={styles.itemTitle}>
+                                    {item.label} ({item.code})
                                 </Text>
                             </View>
 
-                            {/* Progress Track */}
-                            <View style={styles.track}>
-                                <View
-                                    style={[
-                                        styles.fill,
-                                        {
-                                            width: `${percent}%`,
-                                            backgroundColor: item.color,
-                                        },
-                                    ]}
-                                />
-                            </View>
+                            {/* Right: Ratio */}
+                            <Text style={styles.ratioText}>
+                                <Text style={styles.boldUsed}>{item.used}</Text> / {item.total}
+                            </Text>
                         </View>
                     );
                 })}
@@ -78,6 +138,9 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: spacing.sm,
     },
     sectionTitle: {
@@ -85,10 +148,16 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.neutral950,
     },
+    viewAllText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.primary,
+    },
     card: {
         backgroundColor: colors.white,
         borderRadius: 20,
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
         borderWidth: 1,
         borderColor: colors.borderLight,
         shadowColor: colors.neutral950,
@@ -98,47 +167,41 @@ const styles = StyleSheet.create({
         elevation: 1,
     },
     itemRow: {
-        marginBottom: spacing.sm,
-    },
-    labelRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 4,
+        paddingVertical: 10,
     },
-    leftLabel: {
+    rowBorder: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+    },
+    leftContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    dot: {
-        width: 7,
-        height: 7,
-        borderRadius: 3.5,
-        marginRight: 6,
+    iconWrap: {
+        width: 28,
+        height: 28,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: spacing.sm,
     },
     itemTitle: {
-        fontSize: 11.5,
-        fontWeight: '600',
-        color: colors.neutral900,
+        fontSize: 12.5,
+        fontWeight: '500',
+        color: colors.neutral800,
     },
     ratioText: {
-        fontSize: 11,
+        fontSize: 13,
         color: colors.neutral600,
     },
     boldUsed: {
         fontWeight: '700',
         color: colors.neutral950,
     },
-    track: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.neutral100,
-        overflow: 'hidden',
-    },
-    fill: {
-        height: '100%',
-        borderRadius: 3,
-    },
 });
 
-export default LeaveUtilizationCard;
+export default React.memo(LeaveUtilizationCard);
+

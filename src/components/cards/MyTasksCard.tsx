@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { ChevronRightIcon, DocumentIcon } from '../icons/SvgIcons';
+import { ChevronRightIcon, TaskDocIcon } from '../icons/SvgIcons';
 
 export interface TaskItem {
     id: string;
@@ -84,7 +84,7 @@ const MyTasksCard: React.FC<MyTasksCardProps> = ({
                             onPress={() => onTaskPress?.(task)}
                             activeOpacity={0.7}>
                             <View style={[styles.iconWrap, { backgroundColor: task.bgColor }]}>
-                                <DocumentIcon size={18} color={task.iconColor} />
+                                <TaskDocIcon size={16} color={task.iconColor} />
                             </View>
 
                             <View style={styles.taskInfo}>

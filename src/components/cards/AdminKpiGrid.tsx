@@ -1,105 +1,129 @@
 import React from 'react';
 import {
+    ScrollView,
     StyleSheet,
     Text,
     View,
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { TrendingUpIcon } from '../icons/SvgIcons';
+import {
+    AirplaneIcon,
+    HomeBuildingIcon,
+    UserPlusIcon,
+    UsersGroupIcon,
+} from '../icons/SvgIcons';
 
 export interface AdminKpiItem {
     id: string;
     title: string;
     value: string | number;
     subtext: string;
-    highlightText?: string;
-    isPositive?: boolean;
-    iconEmoji: string;
+    badgeText?: string;
+    badgeColor?: string;
+    iconComponent: React.ReactNode;
+    iconBgColor: string;
+}
+
+interface AdminKpiGridProps {
+    data?: AdminKpiItem[];
 }
 
 const DEFAULT_KPIS: AdminKpiItem[] = [
     {
         id: 'total',
-        title: 'Total Employees',
+        title: 'Total\nEmployees',
         value: '248',
+        badgeText: '↑ 12%',
+        badgeColor: colors.success,
         subtext: 'vs last month',
-        highlightText: '↑ 12%',
-        isPositive: true,
-        iconEmoji: '👥',
+        iconBgColor: '#DCFCE7',
+        iconComponent: <UsersGroupIcon size={18} color="#16A34A" />,
     },
     {
         id: 'new',
-        title: 'New Joinees',
+        title: 'New\nJoinees',
         value: '8',
         subtext: 'This Month',
-        highlightText: 'New',
-        isPositive: true,
-        iconEmoji: '🌱',
+        iconBgColor: '#FEF3C7',
+        iconComponent: <UserPlusIcon size={18} color="#FE7717" />,
     },
     {
         id: 'leave',
-        title: 'On Leave Today',
+        title: 'On Leave\nToday',
         value: '28',
-        subtext: 'of total staff',
-        highlightText: '11.3%',
-        iconEmoji: '⛱️',
+        subtext: '11.3%',
+        iconBgColor: '#EFF6FF',
+        iconComponent: <AirplaneIcon size={18} color="#1D68ED" />,
     },
     {
-        id: 'remote',
-        title: 'Remote Today',
+        id: 'wfh',
+        title: 'On WFH\nToday',
         value: '12',
-        subtext: 'working home',
-        highlightText: '4.8%',
-        iconEmoji: '🏠',
+        subtext: '4.8%',
+        iconBgColor: '#FFF1F2',
+        iconComponent: <HomeBuildingIcon size={18} color="#E11D48" />,
     },
 ];
 
-const AdminKpiGrid: React.FC = () => {
+const AdminKpiGrid: React.FC<AdminKpiGridProps> = ({
+    data = DEFAULT_KPIS,
+}) => {
     return (
         <View style={styles.container}>
-            <View style={styles.grid}>
-                {DEFAULT_KPIS.map(kpi => (
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                bounces={false}>
+                {data.map(kpi => (
                     <View key={kpi.id} style={styles.card}>
-                        <View style={styles.topRow}>
-                            <Text style={styles.icon}>{kpi.iconEmoji}</Text>
-                            {kpi.highlightText && (
-                                <View style={styles.highlightBadge}>
-                                    <Text style={styles.highlightText}>
-                                        {kpi.highlightText}
-                                    </Text>
-                                </View>
+                        {/* Top Icon with rounded tint background */}
+                        <View style={[styles.iconContainer, { backgroundColor: kpi.iconBgColor }]}>
+                            {kpi.iconComponent}
+                        </View>
+
+                        {/* Title */}
+                        <Text style={styles.title} numberOfLines={2}>
+                            {kpi.title}
+                        </Text>
+
+                        {/* Value & Optional Badge */}
+                        <View style={styles.valueRow}>
+                            <Text style={styles.value}>{kpi.value}</Text>
+                            {kpi.badgeText && (
+                                <Text style={[styles.badgeText, { color: kpi.badgeColor || colors.success }]}>
+                                    {kpi.badgeText}
+                                </Text>
                             )}
                         </View>
 
-                        <Text style={styles.value}>{kpi.value}</Text>
-                        <Text style={styles.title} numberOfLines={1}>
-                            {kpi.title}
+                        {/* Subtext */}
+                        <Text style={styles.subtext} numberOfLines={1}>
+                            {kpi.subtext}
                         </Text>
-                        <Text style={styles.subtext}>{kpi.subtext}</Text>
                     </View>
                 ))}
-            </View>
+            </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: spacing.lg,
         marginBottom: spacing.md,
     },
-    grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
+    scrollContent: {
+        paddingHorizontal: spacing.lg,
         gap: spacing.sm,
+        flexDirection: 'row',
     },
     card: {
-        width: '48%',
+        width: 82,
+        minWidth: 80,
         backgroundColor: colors.white,
         borderRadius: 18,
-        padding: spacing.md,
+        padding: spacing.sm,
         borderWidth: 1,
         borderColor: colors.borderLight,
         shadowColor: colors.neutral950,
@@ -108,43 +132,43 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 1,
     },
-    topRow: {
-        flexDirection: 'row',
+    iconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         marginBottom: 6,
     },
-    icon: {
-        fontSize: 16,
-    },
-    highlightBadge: {
-        backgroundColor: colors.primarySoft,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 8,
-    },
-    highlightText: {
+    title: {
         fontSize: 9.5,
-        fontWeight: '700',
-        color: colors.primaryDark,
+        fontWeight: '500',
+        color: colors.neutral600,
+        lineHeight: 12,
+        minHeight: 24,
+    },
+    valueRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 3,
+        marginTop: 4,
     },
     value: {
-        fontSize: 22,
+        fontSize: 16,
         fontWeight: '700',
         color: colors.neutral950,
-        lineHeight: 26,
+        lineHeight: 20,
     },
-    title: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: colors.neutral800,
-        marginTop: 2,
+    badgeText: {
+        fontSize: 8.5,
+        fontWeight: '700',
     },
     subtext: {
-        fontSize: 10,
-        color: colors.neutral600,
-        marginTop: 1,
+        fontSize: 8,
+        color: colors.neutral400,
+        marginTop: 2,
     },
 });
 
-export default AdminKpiGrid;
+export default React.memo(AdminKpiGrid);
+

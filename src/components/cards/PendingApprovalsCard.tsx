@@ -7,15 +7,16 @@ import {
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { DocumentIcon } from '../icons/SvgIcons';
+import { ArrowRightIcon, FlightApprovalIcon } from '../icons/SvgIcons';
 
 export interface ApprovalTile {
     id: string;
     count: number;
     title: string;
-    iconEmoji: string;
-    color: string;
+    icon?: React.ReactNode;
+    color?: string;
     bgColor: string;
+    iconBgColor: string;
 }
 
 interface PendingApprovalsCardProps {
@@ -30,25 +31,22 @@ const DEFAULT_TILES: ApprovalTile[] = [
         id: 'leave',
         count: 12,
         title: 'Leave Requests',
-        iconEmoji: '📝',
-        color: '#CB30E0',
-        bgColor: '#FDF2F8',
+        bgColor: '#FFF0F2',
+        iconBgColor: '#FFE4E8',
     },
     {
         id: 'reg',
         count: 3,
         title: 'Regularization',
-        iconEmoji: '⏱️',
-        color: colors.info,
-        bgColor: colors.infoLight,
+        bgColor: '#F0F9FF',
+        iconBgColor: '#E0F2FE',
     },
     {
         id: 'wfh',
         count: 1,
         title: 'WFH Requests',
-        iconEmoji: '🏠',
-        color: colors.primaryDark,
-        bgColor: colors.primarySoft,
+        bgColor: '#F5F3FF',
+        iconBgColor: '#EDE9FE',
     },
 ];
 
@@ -71,8 +69,13 @@ const PendingApprovalsCard: React.FC<PendingApprovalsCardProps> = ({
                     )}
                 </View>
 
-                <TouchableOpacity onPress={onViewAllPress} activeOpacity={0.7}>
-                    <Text style={styles.viewAllText}>View All →</Text>
+                <TouchableOpacity
+                    onPress={onViewAllPress}
+                    activeOpacity={0.7}
+                    style={styles.viewAllBtn}
+                    accessibilityRole="button">
+                    <Text style={styles.viewAllText}>View All</Text>
+                    <ArrowRightIcon size={14} color="#2A9246" />
                 </TouchableOpacity>
             </View>
 
@@ -83,16 +86,21 @@ const PendingApprovalsCard: React.FC<PendingApprovalsCardProps> = ({
                         key={tile.id}
                         style={[styles.tile, { backgroundColor: tile.bgColor }]}
                         onPress={() => onTilePress?.(tile)}
-                        activeOpacity={0.8}>
-                        <View style={styles.topRow}>
-                            <Text style={styles.icon}>{tile.iconEmoji}</Text>
-                            <Text style={[styles.count, { color: tile.color }]}>
-                                {tile.count}
-                            </Text>
+                        activeOpacity={0.8}
+                        accessibilityLabel={`${tile.title}: ${tile.count}`}>
+                        <View
+                            style={[
+                                styles.iconBox,
+                                { backgroundColor: tile.iconBgColor },
+                            ]}>
+                            {tile.icon || (
+                                <FlightApprovalIcon size={16} color="#0F172A" />
+                            )}
                         </View>
-                        <Text
-                            style={[styles.title, { color: colors.neutral900 }]}
-                            numberOfLines={1}>
+
+                        <Text style={styles.countText}>{tile.count}</Text>
+
+                        <Text style={styles.titleText} numberOfLines={1}>
                             {tile.title}
                         </Text>
                     </TouchableOpacity>
@@ -121,12 +129,16 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '700',
         color: colors.neutral950,
+        letterSpacing: -0.2,
     },
     badge: {
-        backgroundColor: colors.error,
+        backgroundColor: '#FF2D55',
         borderRadius: 10,
-        paddingHorizontal: 6,
-        paddingVertical: 1,
+        minWidth: 18,
+        height: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 4,
         marginLeft: 6,
     },
     badgeText: {
@@ -134,46 +146,49 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '700',
     },
+    viewAllBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 2,
+        paddingHorizontal: 4,
+    },
     viewAllText: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: '600',
-        color: colors.primary,
+        color: '#2A9246',
     },
     grid: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: spacing.sm,
+        gap: 10,
     },
     tile: {
         flex: 1,
-        borderRadius: 16,
-        padding: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        shadowColor: colors.neutral950,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.03,
-        shadowRadius: 4,
-        elevation: 1,
+        borderRadius: 18,
+        padding: 12,
+        alignItems: 'flex-start',
     },
-    topRow: {
-        flexDirection: 'row',
+    iconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 4,
+        justifyContent: 'center',
+        marginBottom: 10,
     },
-    icon: {
-        fontSize: 14,
-    },
-    count: {
-        fontSize: 17,
+    countText: {
+        fontSize: 18,
         fontWeight: '700',
+        color: '#0F172A',
+        lineHeight: 22,
     },
-    title: {
-        fontSize: 11,
-        fontWeight: '600',
+    titleText: {
+        fontSize: 11.5,
+        fontWeight: '500',
+        color: '#475569',
         marginTop: 2,
     },
 });
 
-export default PendingApprovalsCard;
+export default React.memo(PendingApprovalsCard);

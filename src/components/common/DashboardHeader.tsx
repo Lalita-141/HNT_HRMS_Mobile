@@ -10,7 +10,7 @@ import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { BellIcon, MenuIcon } from '../icons/SvgIcons';
-import Logo from './Logo';
+import SmallLogoSvg from '../../assets/svg/SmallLogo.svg';
 
 interface DashboardHeaderProps {
     userName?: string;
@@ -44,11 +44,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <MenuIcon size={24} color={colors.neutral950} />
             </TouchableOpacity>
 
-            {/* Middle: Brand Logo & User Greeting */}
+            {/* Middle: Brand Small Logo & User Greeting */}
             <View style={styles.centerSection}>
                 {showLogo && (
                     <View style={styles.logoWrapper}>
-                        <Logo width={110} height={32} />
+                        <SmallLogoSvg width={42} height={28} />
                     </View>
                 )}
                 <View style={styles.greetingWrapper}>

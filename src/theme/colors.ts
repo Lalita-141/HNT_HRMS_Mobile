@@ -4,6 +4,7 @@ export const colors = {
     primaryDark: '#1E854E',
     primaryLight: '#EDFBF4',
     primarySoft: '#EEF9F5',
+    attendanceCardBg: '#EAF8F3',
 
     // Neutrals
     white: '#FFFFFF',

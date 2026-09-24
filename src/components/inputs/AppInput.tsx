@@ -10,6 +10,7 @@ import {
 
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+import { EyeIcon, EyeOffIcon } from '../icons/SvgIcons';
 
 interface AppInputProps extends TextInputProps {
     leftIcon?: React.ReactNode;
@@ -61,10 +62,14 @@ const AppInput = ({
                         onPress={() =>
                             setIsPasswordVisible(previous => !previous)
                         }
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         style={styles.rightButton}>
-                        <Text style={styles.eyeText}>
-                            {isPasswordVisible ? 'Hide' : 'Show'}
-                        </Text>
+                        {isPasswordVisible ? (
+                            <EyeIcon size={22} color={colors.primary} />
+                        ) : (
+                            <EyeOffIcon size={22} color={colors.textSecondary} />
+                        )}
                     </TouchableOpacity>
                 )}
             </View>

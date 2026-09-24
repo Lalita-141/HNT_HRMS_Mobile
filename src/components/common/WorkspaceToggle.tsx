@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
-import { UserIcon } from '../icons/SvgIcons';
+import { MyTeamToggleIcon, MyWorkspaceToggleIcon } from '../icons/SvgIcons';
 
 export type WorkspaceMode = 'workspace' | 'team';
 
@@ -32,12 +32,12 @@ const WorkspaceToggle: React.FC<WorkspaceToggleProps> = ({
                 activeOpacity={0.8}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: activeMode === 'workspace' }}>
-                <UserIcon
-                    size={16}
+                <MyWorkspaceToggleIcon
+                    size={18}
                     color={
                         activeMode === 'workspace'
                             ? colors.white
-                            : colors.primary
+                            : colors.primaryDark
                     }
                 />
                 <Text
@@ -61,18 +61,14 @@ const WorkspaceToggle: React.FC<WorkspaceToggleProps> = ({
                 activeOpacity={0.8}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: activeMode === 'team' }}>
-                <Text
-                    style={[
-                        styles.iconEmoji,
-                        {
-                            color:
-                                activeMode === 'team'
-                                    ? colors.white
-                                    : colors.primary,
-                        },
-                    ]}>
-                    👥
-                </Text>
+                <MyTeamToggleIcon
+                    size={18}
+                    color={
+                        activeMode === 'team'
+                            ? colors.white
+                            : colors.primaryDark
+                    }
+                />
                 <Text
                     style={[
                         styles.label,
