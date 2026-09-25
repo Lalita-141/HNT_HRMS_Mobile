@@ -7,6 +7,8 @@ import ManagerTeamScreen from '../features/manager/screens/ManagerTeamScreen';
 import AdminDashboardScreen from '../features/admin/screens/AdminDashboardScreen';
 import AppDrawerModal, { RoleScreenTarget } from '../components/common/AppDrawerModal';
 import { DrawerProvider, useDrawer } from '../context/DrawerContext';
+import { useAuth } from '../context/AuthContext';
+import { getInitialRoleRoute } from '../utils/roleUtils';
 
 export type AppStackParamList = {
     MainTabs: undefined;
@@ -39,6 +41,9 @@ const ManagerScreen = ({ navigation }: StackScreenProps<'Manager'>) => {
 const AppNavigatorContent = () => {
     const navigation = useNavigation<any>();
     const { isDrawerOpen, activeRoute, closeDrawer, setActiveRoute } = useDrawer();
+    const { userRoles } = useAuth();
+
+    const initialRouteName = getInitialRoleRoute(userRoles);
 
     const handleNavigate = (route: RoleScreenTarget) => {
         setActiveRoute(route);
@@ -49,7 +54,7 @@ const AppNavigatorContent = () => {
     return (
         <View style={styles.container}>
             <Stack.Navigator
-                initialRouteName="Admin"
+                initialRouteName={initialRouteName}
                 screenOptions={{
                     headerShown: false,
                     animation: 'fade',

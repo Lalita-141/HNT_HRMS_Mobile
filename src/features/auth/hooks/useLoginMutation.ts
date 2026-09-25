@@ -12,12 +12,13 @@ export const useLoginMutation = () => {
 
         onSuccess: (response: LoginResponse) => {
             if (response?.SUCCESS && response.DATA?.token) {
-                const token = response.DATA.token;
-                const roles = response.DATA.roles || ['EMPLOYEE'];
-                const username = response.DATA.username || 'Ismail Akhtar';
-                const refreshToken = response.DATA.refreshToken;
-
-                login(token, roles, username, refreshToken);
+                const token = response.DATA?.token || '';
+                const roles = response.DATA?.roles || ['EMPLOYEE'];
+                const username = response.DATA?.username || 'Employee Name';
+                const refreshToken = response.DATA?.refreshToken || '';
+                const email = response.DATA?.email || '';
+                const employeeId = response.DATA?.employeeId || '';
+                login(token, roles, username, refreshToken, email, employeeId);
                 console.log('Login successful for user:', username, 'with roles:', roles);
             }
         },

@@ -118,6 +118,8 @@ export const BiometricService = {
                 },
             });
 
+            console.log('Credentials' + credentials)
+
             if (credentials && credentials.password) {
                 return {
                     username: credentials.username,

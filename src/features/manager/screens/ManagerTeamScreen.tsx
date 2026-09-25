@@ -15,8 +15,10 @@ import TeamAttendanceRow from '../../../components/cards/TeamAttendanceRow';
 import PeopleMomentsCard from '../../../components/cards/PeopleMomentsCard';
 import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBar';
 
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../context/AuthContext';
 import { useDrawer } from '../../../context/DrawerContext';
+import { canAccessEmployeeWorkspace } from '../../../utils/roleUtils';
 
 interface ManagerTeamScreenProps {
     onSwitchToWorkspace?: () => void;
@@ -29,8 +31,11 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
 }) => {
     const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>('team');
     const [activeTab, setActiveTab] = useState<TabKey>('Home');
-    const { userName } = useAuth();
+    const { userName, userRoles } = useAuth();
     const { openDrawer } = useDrawer();
+    const navigation = useNavigation<any>();
+
+    const canSwitchToWorkspace = canAccessEmployeeWorkspace(userRoles);
 
     const handleToggleWorkspace = (mode: WorkspaceMode) => {
         setWorkspaceMode(mode);
@@ -44,6 +49,14 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
             onMenuPress();
         } else {
             openDrawer('Manager');
+        }
+    };
+
+    const handleSelectTab = (tab: TabKey) => {
+        if (tab === 'Home') {
+            setActiveTab('Home');
+        } else {
+            navigation.navigate('MainTabs', { screen: tab });
         }
     };
 
@@ -63,11 +76,13 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
                     style={styles.scroll}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}>
-                    {/* Segmented Switcher: My Workspace vs My Team */}
-                    <WorkspaceToggle
-                        activeMode={workspaceMode}
-                        onToggle={handleToggleWorkspace}
-                    />
+                    {/* Segmented Switcher: My Workspace vs My Team (Only if user has Employee role) */}
+                    {canSwitchToWorkspace && (
+                        <WorkspaceToggle
+                            activeMode={workspaceMode}
+                            onToggle={handleToggleWorkspace}
+                        />
+                    )}
 
                     {/* Team Snapshots (5 KPI Metrics) */}
                     <TeamSnapshotGrid />
@@ -88,12 +103,13 @@ const ManagerTeamScreen: React.FC<ManagerTeamScreenProps> = ({
                 {/* Floating Bottom Navigation Tab Bar */}
                 <BottomTabBar
                     activeTab={activeTab}
-                    onSelectTab={setActiveTab}
+                    onSelectTab={handleSelectTab}
                 />
             </View>
         </SafeAreaView>
     );
 };
+
 
 const styles = StyleSheet.create({
     safeArea: {

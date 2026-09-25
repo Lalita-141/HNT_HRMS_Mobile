@@ -20,6 +20,7 @@ import CelebrationBannerCard from '../../../components/cards/CelebrationBannerCa
 import AdminQuickActions from '../../../components/cards/AdminQuickActions';
 import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBar';
 
+import { useNavigation } from '@react-navigation/native';
 import { useDrawer } from '../../../context/DrawerContext';
 
 interface AdminDashboardScreenProps {
@@ -38,6 +39,7 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
     const [refreshing, setRefreshing] = useState(false);
     const { userName } = useAuth();
     const { openDrawer } = useDrawer();
+    const navigation = useNavigation<any>();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -57,6 +59,14 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
 
     const handleQuickAction = (action: { id: string; title: string }) => {
         Alert.alert(action.title.replace('\n', ' '), `Navigating to ${action.title.replace('\n', ' ')} management...`);
+    };
+
+    const handleSelectTab = (tab: TabKey) => {
+        if (tab === 'Home') {
+            setActiveTab('Home');
+        } else {
+            navigation.navigate('MainTabs', { screen: tab });
+        }
     };
 
     return (
@@ -127,12 +137,13 @@ const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
                 {/* Bottom Navigation Tab Bar */}
                 <BottomTabBar
                     activeTab={activeTab}
-                    onSelectTab={setActiveTab}
+                    onSelectTab={handleSelectTab}
                 />
             </View>
         </SafeAreaView>
     );
 };
+
 
 
 const styles = StyleSheet.create({

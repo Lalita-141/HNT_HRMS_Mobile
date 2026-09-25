@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { RoleScreenTarget } from '../components/common/AppDrawerModal';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getInitialRoleRoute, RoleScreenTarget } from '../utils/roleUtils';
+import { useAuth } from './AuthContext';
 
 interface DrawerContextType {
     isDrawerOpen: boolean;
@@ -11,15 +12,20 @@ interface DrawerContextType {
 
 const DrawerContext = createContext<DrawerContextType>({
     isDrawerOpen: false,
-    activeRoute: 'Admin',
+    activeRoute: 'MainTabs',
     openDrawer: () => {},
     closeDrawer: () => {},
     setActiveRoute: () => {},
 });
 
 export const DrawerProvider = ({ children }: { children: ReactNode }) => {
+    const { userRoles } = useAuth();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [activeRoute, setActiveRoute] = useState<RoleScreenTarget>('Admin');
+    const [activeRoute, setActiveRoute] = useState<RoleScreenTarget>(() => getInitialRoleRoute(userRoles));
+
+    useEffect(() => {
+        setActiveRoute(getInitialRoleRoute(userRoles));
+    }, [userRoles]);
 
     const openDrawer = (route?: RoleScreenTarget) => {
         if (route) {

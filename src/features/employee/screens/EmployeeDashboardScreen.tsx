@@ -19,6 +19,7 @@ import BottomTabBar, { TabKey } from '../../../components/navigation/BottomTabBa
 
 import { useAuth } from '../../../context/AuthContext';
 import { useDrawer } from '../../../context/DrawerContext';
+import { canAccessManagerDashboard } from '../../../utils/roleUtils';
 
 interface EmployeeDashboardScreenProps {
     onSwitchToTeam?: () => void;
@@ -37,8 +38,10 @@ const EmployeeDashboardScreen: React.FC<EmployeeDashboardScreenProps> = ({
     const [attendanceMethod, setAttendanceMethod] = useState<AttendanceMethod>('biometric');
     const [activeTab, setActiveTab] = useState<TabKey>('Home');
     const [isLocationTrackingOn, setIsLocationTrackingOn] = useState(true);
-    const { userName } = useAuth();
+    const { userName, userRoles } = useAuth();
     const { openDrawer } = useDrawer();
+
+    const canSwitchToTeam = showWorkspaceToggle && canAccessManagerDashboard(userRoles);
 
     const handleToggleWorkspace = (mode: WorkspaceMode) => {
         setWorkspaceMode(mode);
@@ -77,8 +80,8 @@ const EmployeeDashboardScreen: React.FC<EmployeeDashboardScreenProps> = ({
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                     bounces={true}>
-                    {/* Segmented Switcher: My Workspace vs My Team */}
-                    {showWorkspaceToggle && (
+                    {/* Segmented Switcher: My Workspace vs My Team (Hidden for Employee-only users) */}
+                    {canSwitchToTeam && (
                         <WorkspaceToggle
                             activeMode={workspaceMode}
                             onToggle={handleToggleWorkspace}

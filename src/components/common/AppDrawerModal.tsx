@@ -24,8 +24,15 @@ import {
     UserPlusIcon,
     UsersGroupIcon,
 } from '../icons/SvgIcons';
+import {
+    canAccessAdminDashboard,
+    canAccessEmployeeWorkspace,
+    canAccessManagerDashboard,
+    getPrimaryRoleDisplayName,
+    RoleScreenTarget,
+} from '../../utils/roleUtils';
 
-export type RoleScreenTarget = 'MainTabs' | 'Manager' | 'Admin' | 'SuperAdmin';
+export type { RoleScreenTarget };
 
 interface AppDrawerModalProps {
     visible: boolean;
@@ -96,13 +103,7 @@ const AppDrawerModal: React.FC<AppDrawerModalProps> = ({
                                 </Text>
                                 <View style={styles.roleBadge}>
                                     <Text style={styles.roleBadgeText}>
-                                        {userRoles.some(r => r.toUpperCase().includes('SUPER'))
-                                            ? 'Super Admin'
-                                            : userRoles.some(r => r.toUpperCase().includes('ADMIN'))
-                                            ? 'Admin'
-                                            : userRoles.some(r => r.toUpperCase().includes('MANAGER'))
-                                            ? 'Team Manager'
-                                            : userRoles[0] || 'Employee'}
+                                        {getPrimaryRoleDisplayName(userRoles)}
                                     </Text>
                                 </View>
                             </View>
@@ -114,99 +115,106 @@ const AppDrawerModal: React.FC<AppDrawerModalProps> = ({
                     <View style={styles.menuList}>
                         <Text style={styles.sectionHeader}>DASHBOARD ROLES</Text>
 
-                        {/* Employee Workspace */}
-                        <TouchableOpacity
-                            style={[
-                                styles.menuItem,
-                                activeRoute === 'MainTabs' && styles.activeMenuItem,
-                            ]}
-                            onPress={() => handleSelectRole('MainTabs')}
-                            activeOpacity={0.7}>
-                            <View
+                        {/* 1. Employee Workspace (Visible only if user has Employee role) */}
+                        {canAccessEmployeeWorkspace(userRoles) && (
+                            <TouchableOpacity
                                 style={[
-                                    styles.menuIconWrap,
-                                    activeRoute === 'MainTabs' && styles.activeMenuIconWrap,
-                                ]}>
-                                <HomeIcon
-                                    size={18}
-                                    color={activeRoute === 'MainTabs' ? colors.white : colors.primary}
-                                />
-                            </View>
-                            <View style={styles.menuTextWrap}>
-                                <Text
+                                    styles.menuItem,
+                                    activeRoute === 'MainTabs' && styles.activeMenuItem,
+                                ]}
+                                onPress={() => handleSelectRole('MainTabs')}
+                                activeOpacity={0.7}>
+                                <View
                                     style={[
-                                        styles.menuTitle,
-                                        activeRoute === 'MainTabs' && styles.activeMenuTitle,
+                                        styles.menuIconWrap,
+                                        activeRoute === 'MainTabs' && styles.activeMenuIconWrap,
                                     ]}>
-                                    Employee Workspace
-                                </Text>
-                                <Text style={styles.menuDesc}>Attendance, Leaves &amp; Tasks</Text>
-                            </View>
-                        </TouchableOpacity>
+                                    <HomeIcon
+                                        size={18}
+                                        color={activeRoute === 'MainTabs' ? colors.white : colors.primary}
+                                    />
+                                </View>
+                                <View style={styles.menuTextWrap}>
+                                    <Text
+                                        style={[
+                                            styles.menuTitle,
+                                            activeRoute === 'MainTabs' && styles.activeMenuTitle,
+                                        ]}>
+                                        Employee Workspace
+                                    </Text>
+                                    <Text style={styles.menuDesc}>Attendance, Leaves &amp; Tasks</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
 
-                        {/* Manager - My Team */}
-                        <TouchableOpacity
-                            style={[
-                                styles.menuItem,
-                                activeRoute === 'Manager' && styles.activeMenuItem,
-                            ]}
-                            onPress={() => handleSelectRole('Manager')}
-                            activeOpacity={0.7}>
-                            <View
+                        {/* 2. Manager - My Team (Visible only to Manager, Admin, Super Admin) */}
+                        {canAccessManagerDashboard(userRoles) && (
+                            <TouchableOpacity
                                 style={[
-                                    styles.menuIconWrap,
-                                    activeRoute === 'Manager' && styles.activeMenuIconWrap,
-                                ]}>
-                                <UsersGroupIcon
-                                    size={18}
-                                    color={activeRoute === 'Manager' ? colors.white : '#2563EB'}
-                                />
-                            </View>
-                            <View style={styles.menuTextWrap}>
-                                <Text
+                                    styles.menuItem,
+                                    activeRoute === 'Manager' && styles.activeMenuItem,
+                                ]}
+                                onPress={() => handleSelectRole('Manager')}
+                                activeOpacity={0.7}>
+                                <View
                                     style={[
-                                        styles.menuTitle,
-                                        activeRoute === 'Manager' && styles.activeMenuTitle,
+                                        styles.menuIconWrap,
+                                        activeRoute === 'Manager' && styles.activeMenuIconWrap,
                                     ]}>
-                                    My Team (Manager)
-                                </Text>
-                                <Text style={styles.menuDesc}>Team Roster &amp; Moments</Text>
-                            </View>
-                        </TouchableOpacity>
+                                    <UsersGroupIcon
+                                        size={18}
+                                        color={activeRoute === 'Manager' ? colors.white : '#2563EB'}
+                                    />
+                                </View>
+                                <View style={styles.menuTextWrap}>
+                                    <Text
+                                        style={[
+                                            styles.menuTitle,
+                                            activeRoute === 'Manager' && styles.activeMenuTitle,
+                                        ]}>
+                                        My Team (Manager)
+                                    </Text>
+                                    <Text style={styles.menuDesc}>Team Roster &amp; Moments</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
 
-                        {/* Admin / SuperAdmin Dashboard */}
-                        <TouchableOpacity
-                            style={[
-                                styles.menuItem,
-                                activeRoute === 'Admin' && styles.activeMenuItem,
-                            ]}
-                            onPress={() => handleSelectRole('Admin')}
-                            activeOpacity={0.7}>
-                            <View
+                        {/* 3. Admin / SuperAdmin Dashboard (Visible only to Admin, Super Admin) */}
+                        {canAccessAdminDashboard(userRoles) && (
+                            <TouchableOpacity
                                 style={[
-                                    styles.menuIconWrap,
-                                    activeRoute === 'Admin' && styles.activeMenuIconWrap,
-                                ]}>
-                                <BarChartIcon
-                                    size={18}
-                                    color={activeRoute === 'Admin' ? colors.white : '#E11D48'}
-                                />
-                            </View>
-                            <View style={styles.menuTextWrap}>
-                                <Text
+                                    styles.menuItem,
+                                    activeRoute === 'Admin' && styles.activeMenuItem,
+                                ]}
+                                onPress={() => handleSelectRole('Admin')}
+                                activeOpacity={0.7}>
+                                <View
                                     style={[
-                                        styles.menuTitle,
-                                        activeRoute === 'Admin' && styles.activeMenuTitle,
+                                        styles.menuIconWrap,
+                                        activeRoute === 'Admin' && styles.activeMenuIconWrap,
                                     ]}>
-                                    Admin Dashboard
-                                </Text>
-                                <Text style={styles.menuDesc}>Operations, Approvals &amp; KPIs</Text>
-                            </View>
-                        </TouchableOpacity>
+                                    <BarChartIcon
+                                        size={18}
+                                        color={activeRoute === 'Admin' ? colors.white : '#E11D48'}
+                                    />
+                                </View>
+                                <View style={styles.menuTextWrap}>
+                                    <Text
+                                        style={[
+                                            styles.menuTitle,
+                                            activeRoute === 'Admin' && styles.activeMenuTitle,
+                                        ]}>
+                                        Admin Dashboard
+                                    </Text>
+                                    <Text style={styles.menuDesc}>Operations, Approvals &amp; KPIs</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
                     </View>
 
                     {/* Footer Logout */}
                     <View style={styles.footer}>
+
                         <TouchableOpacity
                             style={styles.logoutButton}
                             onPress={handleLogout}

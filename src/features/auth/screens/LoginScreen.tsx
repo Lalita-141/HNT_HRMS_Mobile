@@ -38,14 +38,15 @@ const LoginScreen = () => {
             try {
                 // Parse stored session payload
                 const session = JSON.parse(result.token);
+                console.log('After biologin stored user session' + JSON.stringify(session))
                 login(
                     session.token,
-                    session.roles || ['Super Admin'],
-                    session.username || 'Sampat Kolekar',
+                    session.roles || ['Employee'],
+                    session.username || 'Employee Name',
                     session.refreshToken
                 );
             } catch {
-                login(result.token, ['Super Admin'], result.username);
+                login(result.token, ['Employee'], result.username);
             }
         }
     };
@@ -54,6 +55,8 @@ const LoginScreen = () => {
         const checkAndPrompt = async () => {
             const { isSupported } = await BiometricService.getBiometricType();
             const hasSaved = await BiometricService.hasSavedCredentials();
+            console.log('Supported' + isSupported)
+            console.log('Has saved' + hasSaved)
             if (isSupported && hasSaved) {
                 // Auto-prompt on launch if biometrics are enrolled
                 handleBiometricLogin();
@@ -72,7 +75,8 @@ const LoginScreen = () => {
         // 2. Check device biometrics & prompt enrollment if not saved yet
         const { isSupported, type } = await BiometricService.getBiometricType();
         const hasSaved = await BiometricService.hasSavedCredentials();
-
+        console.log("isSupported and type on first login" + isSupported, type)
+        console.log("hasSaved on first login" + hasSaved)
         if (isSupported && !hasSaved) {
             Alert.alert(
                 `Enable ${type === 'FaceID' ? 'Face ID' : 'Fingerprint'}?`,

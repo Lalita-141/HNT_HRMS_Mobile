@@ -12,6 +12,7 @@ import { typography } from '../../theme/typography';
 import { BellIcon, MenuIcon } from '../icons/SvgIcons';
 import SmallLogoSvg from '../../assets/svg/SmallLogo.svg';
 
+import { useNavigation } from '@react-navigation/native';
 import { useDrawer } from '../../context/DrawerContext';
 
 interface DashboardHeaderProps {
@@ -36,12 +37,29 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     showLogo = true,
 }) => {
     const { openDrawer } = useDrawer();
+    const navigation = useNavigation<any>();
 
     const handleMenuPress = () => {
         if (onMenuPress) {
             onMenuPress();
         } else {
             openDrawer();
+        }
+    };
+
+    const handleAvatarPress = () => {
+        if (onAvatarPress) {
+            onAvatarPress();
+        } else {
+            try {
+                navigation.navigate('MainTabs', { screen: 'Profile' });
+            } catch {
+                try {
+                    navigation.navigate('Profile');
+                } catch (err) {
+                    console.log('Navigation to Profile failed:', err);
+                }
+            }
         }
     };
 
@@ -89,10 +107,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={onAvatarPress}
+                    onPress={handleAvatarPress}
                     style={styles.avatarButton}
                     activeOpacity={0.7}
                     accessibilityLabel="User Profile">
+
                     {avatarUri ? (
                         <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
                     ) : (
