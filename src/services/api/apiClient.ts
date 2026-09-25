@@ -7,6 +7,7 @@ import {
     setRefreshToken,
 } from '../storage/authStorage';
 import { BiometricService } from '../biometric/biometricService';
+import { globalToast } from '../../context/ToastContext';
 
 export interface ApiOptions {
     params?: Record<
@@ -17,6 +18,7 @@ export interface ApiOptions {
     headers?: Record<string, string>;
     timeout?: number;
     _retry?: boolean;
+    silent?: boolean;
 }
 
 export class ApiError extends Error {
@@ -253,47 +255,82 @@ const request = async <T>(
             responseData = await response.text();
         }
 
+        let apiError: ApiError | null = null;
+
         if (!response.ok) {
             let message = `Request failed with status ${response.status}`;
 
             if (typeof responseData === 'object' && responseData !== null) {
-                if ('MESSAGE' in responseData) {
+                if ('MESSAGE' in responseData && (responseData as any).MESSAGE) {
                     message = String((responseData as { MESSAGE?: unknown }).MESSAGE);
-                } else if ('message' in responseData) {
+                } else if ('message' in responseData && (responseData as any).message) {
                     message = String((responseData as { message?: unknown }).message);
+                } else if ('error' in responseData && (responseData as any).error) {
+                    message = String((responseData as { error?: unknown }).error);
                 }
             }
 
-            throw new ApiError(
+            apiError = new ApiError(
                 response.status,
                 message,
                 responseData,
             );
+        } else if (
+            typeof responseData === 'object' &&
+            responseData !== null &&
+            ('SUCCESS' in responseData || 'success' in responseData)
+        ) {
+            const isSuccess = (responseData as any).SUCCESS ?? (responseData as any).success;
+            if (isSuccess === false) {
+                const message =
+                    (responseData as any).MESSAGE ||
+                    (responseData as any).message ||
+                    (responseData as any).error ||
+                    'Request failed';
+                apiError = new ApiError(
+                    response.status || 400,
+                    String(message),
+                    responseData
+                );
+            }
+        }
+
+        if (apiError) {
+            if (!options.silent) {
+                globalToast.showError(apiError.message, apiError.status);
+            }
+            throw apiError;
         }
 
         return responseData as T;
     } catch (error) {
         clearTimeout(timeoutId);
 
+        let finalError: ApiError;
+
         if (
             error instanceof Error &&
             error.name === 'AbortError'
         ) {
-            throw new ApiError(
+            finalError = new ApiError(
                 408,
                 'Request timed out. Please try again.',
             );
+        } else if (error instanceof ApiError) {
+            finalError = error;
+        } else {
+            finalError = new ApiError(
+                0,
+                'Network error. Please check your internet connection.',
+                error,
+            );
         }
 
-        if (error instanceof ApiError) {
-            throw error;
+        if (!options.silent && !(error instanceof ApiError)) {
+            globalToast.showError(finalError.message, finalError.status);
         }
 
-        throw new ApiError(
-            0,
-            'Network error. Please check your internet connection.',
-            error,
-        );
+        throw finalError;
     }
 };
 

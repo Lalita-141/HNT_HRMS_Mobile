@@ -25,25 +25,89 @@ import MailIcon from '../../../assets/images/Login/MailIcon.png';
 import LockIcon from '../../../assets/images/Login/PasswordIcon.png';
 import PageBottomBg from '../../../assets/images/PageBottombg.png';
 import { BiometricService } from '../../../services/biometric/biometricService';
+import { authService } from '../services/authService';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('s.kolekar@handt.ai');
     const [password, setPassword] = useState('superadmin@123');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const { mutate: loginMutation, isPending, isError, error } = useLoginMutation();
     const { login } = useAuth();
+
+    const handleEmailChange = (text: string) => {
+        setEmail(text);
+        if (errorMessage) setErrorMessage(null);
+    };
+
+    const handlePasswordChange = (text: string) => {
+        setPassword(text);
+        if (errorMessage) setErrorMessage(null);
+    };
 
     const handleBiometricLogin = async () => {
         const result = await BiometricService.authenticate();
         if (result && result.token) {
             try {
-                // Parse stored session payload
+                // 1. Parse stored session payload from secure hardware
                 const session = JSON.parse(result.token);
-                console.log('After biologin stored user session' + JSON.stringify(session))
+                console.log('Biometric unlock payload retrieved:', session?.email || session?.username);
+
+                // 2. Call backend to validate refresh token and get fresh rotated access token
+                if (session?.refreshToken) {
+                    try {
+                        const refreshResponse = await authService.refreshToken(session.refreshToken);
+                        if (refreshResponse?.SUCCESS && refreshResponse?.DATA) {
+                            const freshData = refreshResponse.DATA;
+                            const freshToken = freshData.token || freshData.accessToken || session.token;
+                            const freshRefreshToken = freshData.refreshToken || session.refreshToken;
+                            const freshRoles = freshData.roles || session.roles || ['Employee'];
+                            const freshUsername = freshData.username || session.username || 'Employee Name';
+                            const freshEmail = freshData.email || session.email || '';
+                            const freshEmpId = freshData.employeeId || session.employeeId || '';
+
+                            // 3. Update hardware-backed KeyStore with the latest fresh session data
+                            await BiometricService.enableBiometricsAfterLogin({
+                                token: freshToken,
+                                refreshToken: freshRefreshToken,
+                                roles: freshRoles,
+                                username: freshUsername,
+                                email: freshEmail,
+                                employeeId: freshEmpId,
+                            });
+
+                            // 4. Log in with validated fresh credentials
+                            login(
+                                freshToken,
+                                freshRoles,
+                                freshUsername,
+                                freshRefreshToken,
+                                freshEmail,
+                                freshEmpId
+                            );
+                            return;
+                        }
+                    } catch (apiError: any) {
+                        console.warn('Biometric refresh token validation failed:', apiError);
+                        // If token was revoked or expired on server (401/403)
+                        if (apiError?.status === 401 || apiError?.status === 403) {
+                            Alert.alert(
+                                'Session Expired',
+                                'Your biometric session has expired. Please log in with your email and password.',
+                                [{ text: 'OK' }]
+                            );
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback to active local session if offline or no refresh token
                 login(
                     session.token,
                     session.roles || ['Employee'],
                     session.username || 'Employee Name',
-                    session.refreshToken
+                    session.refreshToken,
+                    session.email,
+                    session.employeeId
                 );
             } catch {
                 login(result.token, ['Employee'], result.username);
@@ -66,8 +130,14 @@ const LoginScreen = () => {
     }, []);
 
     const handleLoginSuccess = async (responseData: any) => {
+        if (!responseData?.SUCCESS || !responseData?.DATA?.token) {
+            const msg = responseData?.MESSAGE || 'Invalid email or password.';
+            setErrorMessage(msg);
+            return;
+        }
+
+        setErrorMessage(null);
         const data = responseData?.DATA;
-        if (!data) return;
 
         // 1. Set Auth context
         login(data.token, data.roles, data.username, data.refreshToken, data.email, data.employeeId);
@@ -95,16 +165,25 @@ const LoginScreen = () => {
     };
 
     const handleLogin = () => {
+        setErrorMessage(null);
+
+        if (!email.trim() || !password.trim()) {
+            const msg = 'Please enter both email and password.';
+            setErrorMessage(msg);
+            return;
+        }
+
         const payload = {
-            email,
-            password,
+            email: email.trim(),
+            password: password.trim(),
         };
         loginMutation(payload, {
             onSuccess: (response) => {
                 handleLoginSuccess(response);
             },
-            onError: (err) => {
-                console.log('Login mutation error:', err);
+            onError: (err: any) => {
+                const msg = err?.message || 'Invalid email or password.';
+                setErrorMessage(msg);
             },
         });
     };
@@ -141,7 +220,7 @@ const LoginScreen = () => {
                             autoCapitalize="none"
                             keyboardType="email-address"
                             value={email}
-                            onChangeText={setEmail}
+                            onChangeText={handleEmailChange}
                             leftIcon={
                                 <Image
                                     source={MailIcon}
@@ -156,7 +235,7 @@ const LoginScreen = () => {
                             placeholder="Password"
                             isPassword
                             value={password}
-                            onChangeText={setPassword}
+                            onChangeText={handlePasswordChange}
                             leftIcon={
                                 <Image
                                     source={LockIcon}
@@ -177,10 +256,10 @@ const LoginScreen = () => {
                         </TouchableOpacity>
 
                         {/* Error Message if any */}
-                        {isError && (
+                        {(errorMessage || isError) && (
                             <View style={styles.errorContainer}>
                                 <Text style={styles.errorText}>
-                                    {error?.message || 'Login failed. Please check your credentials.'}
+                                    {errorMessage || error?.message || 'Invalid email or password.'}
                                 </Text>
                             </View>
                         )}

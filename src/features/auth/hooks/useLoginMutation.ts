@@ -8,7 +8,17 @@ export const useLoginMutation = () => {
     const { login } = useAuth();
 
     return useMutation<LoginResponse, ApiError, LoginRequestBody>({
-        mutationFn: (payload: LoginRequestBody) => authService.login(payload),
+        mutationFn: async (payload: LoginRequestBody) => {
+            const response = await authService.login(payload);
+            if (response && response.SUCCESS === false) {
+                throw new ApiError(
+                    400,
+                    response.MESSAGE || 'Invalid email or password.',
+                    response
+                );
+            }
+            return response;
+        },
 
         onSuccess: (response: LoginResponse) => {
             if (response?.SUCCESS && response.DATA?.token) {
