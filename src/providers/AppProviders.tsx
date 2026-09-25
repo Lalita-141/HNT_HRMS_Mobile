@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../config/queryClient';
 import { AuthProvider } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
+import { LoadingProvider } from '../context/LoadingContext';
 
 interface Props {
     children: ReactNode;
@@ -14,9 +15,11 @@ export const AppProviders = ({ children }: Props) => {
         <SafeAreaProvider>
             <QueryClientProvider client={queryClient}>
                 <ToastProvider>
-                    <AuthProvider>
-                        {children}
-                    </AuthProvider>
+                    <LoadingProvider>
+                        <AuthProvider>
+                            {children}
+                        </AuthProvider>
+                    </LoadingProvider>
                 </ToastProvider>
             </QueryClientProvider>
         </SafeAreaProvider>

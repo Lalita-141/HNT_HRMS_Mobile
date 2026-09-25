@@ -8,6 +8,7 @@ import {
 } from '../storage/authStorage';
 import { BiometricService } from '../biometric/biometricService';
 import { globalToast } from '../../context/ToastContext';
+import { globalLoader } from '../../context/LoadingContext';
 
 export interface ApiOptions {
     params?: Record<
@@ -19,6 +20,8 @@ export interface ApiOptions {
     timeout?: number;
     _retry?: boolean;
     silent?: boolean;
+    showLoader?: boolean;
+    loaderMessage?: string;
 }
 
 export class ApiError extends Error {
@@ -172,6 +175,10 @@ const request = async <T>(
     const timeoutId = setTimeout(() => {
         controller.abort();
     }, timeout);
+
+    if (options.showLoader) {
+        globalLoader.show(options.loaderMessage || 'Loading...');
+    }
 
     try {
         const response = await fetch(
@@ -331,6 +338,10 @@ const request = async <T>(
         }
 
         throw finalError;
+    } finally {
+        if (options.showLoader) {
+            globalLoader.hide();
+        }
     }
 };
 

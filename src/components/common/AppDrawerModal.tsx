@@ -32,6 +32,8 @@ import {
     RoleScreenTarget,
 } from '../../utils/roleUtils';
 
+import { globalLoader } from '../../context/LoadingContext';
+
 export type { RoleScreenTarget };
 
 interface AppDrawerModalProps {
@@ -50,9 +52,18 @@ const AppDrawerModal: React.FC<AppDrawerModalProps> = ({
     const { userName, userRoles, logout } = useAuth();
 
     const handleSelectRole = (route: RoleScreenTarget) => {
+        if (route === activeRoute) {
+            onClose();
+            return;
+        }
+
         onClose();
+        globalLoader.show('Switching workspace...');
         setTimeout(() => {
             onNavigate(route);
+            setTimeout(() => {
+                globalLoader.hide();
+            }, 300);
         }, 150);
     };
 

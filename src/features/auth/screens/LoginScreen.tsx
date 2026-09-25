@@ -26,6 +26,7 @@ import LockIcon from '../../../assets/images/Login/PasswordIcon.png';
 import PageBottomBg from '../../../assets/images/PageBottombg.png';
 import { BiometricService } from '../../../services/biometric/biometricService';
 import { authService } from '../services/authService';
+import { globalLoader } from '../../../context/LoadingContext';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('s.kolekar@handt.ai');
@@ -47,6 +48,9 @@ const LoginScreen = () => {
     const handleBiometricLogin = async () => {
         const result = await BiometricService.authenticate();
         if (result && result.token) {
+            // Show loader immediately after fingerprint matches
+            globalLoader.show('Logging in...');
+
             try {
                 // 1. Parse stored session payload from secure hardware
                 const session = JSON.parse(result.token);
@@ -84,10 +88,16 @@ const LoginScreen = () => {
                                 freshEmail,
                                 freshEmpId
                             );
+
+                            // Smoothly hide loader after screen transition mounts
+                            setTimeout(() => {
+                                globalLoader.hide();
+                            }, 350);
                             return;
                         }
                     } catch (apiError: any) {
                         console.warn('Biometric refresh token validation failed:', apiError);
+                        globalLoader.hide();
                         // If token was revoked or expired on server (401/403)
                         if (apiError?.status === 401 || apiError?.status === 403) {
                             Alert.alert(
@@ -109,7 +119,12 @@ const LoginScreen = () => {
                     session.email,
                     session.employeeId
                 );
+
+                setTimeout(() => {
+                    globalLoader.hide();
+                }, 350);
             } catch {
+                globalLoader.hide();
                 login(result.token, ['Employee'], result.username);
             }
         }
