@@ -106,3 +106,23 @@ export const getEmployeeId = (): string | null => {
     }
 };
 
+const HAS_SEEN_ONBOARDING_KEY = 'has_seen_onboarding';
+
+export const setHasSeenOnboarding = (seen: boolean = true): void => {
+    try {
+        const storage = getStorage();
+        storage.set(HAS_SEEN_ONBOARDING_KEY, seen);
+    } catch (e) {
+        console.error('Failed to set has seen onboarding:', e);
+    }
+};
+
+export const getHasSeenOnboarding = (): boolean => {
+    try {
+        const storage = getStorage();
+        return storage.getBoolean(HAS_SEEN_ONBOARDING_KEY) ?? false;
+    } catch {
+        return false;
+    }
+};
+

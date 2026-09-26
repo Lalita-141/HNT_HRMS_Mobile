@@ -15,6 +15,7 @@ import { spacing } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 
 import Logo from '../../components/common/Logo';
+import { getHasSeenOnboarding } from '../../services/storage/authStorage';
 
 type SplashScreenProps = NativeStackScreenProps<AuthStackParamList, 'Splash'>;
 
@@ -23,7 +24,12 @@ const SplashScreen = ({ navigation }: SplashScreenProps) => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigation.replace('Onboarding');
+            const hasSeenOnboarding = getHasSeenOnboarding();
+            if (hasSeenOnboarding) {
+                navigation.replace('Login');
+            } else {
+                navigation.replace('Onboarding');
+            }
         }, 3000);
 
         return () => clearTimeout(timer);

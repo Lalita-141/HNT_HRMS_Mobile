@@ -20,6 +20,7 @@ import PrimaryButton from '../../components/buttons/PrimaryButton';
 import OnboardingHeader from '../../components/common/OnboardingHeader';
 import OnboardingPagination from '../../components/common/OnboardingPagination';
 import { ONBOARDING_DATA, OnboardingSlideItem } from './onboardingData';
+import { setHasSeenOnboarding } from '../../services/storage/authStorage';
 
 type OnboardingScreenProps = NativeStackScreenProps<
     AuthStackParamList,
@@ -32,6 +33,7 @@ const OnboardingScreen = ({ navigation }: OnboardingScreenProps) => {
     const flatListRef = useRef<FlatList<OnboardingSlideItem>>(null);
 
     const handleSkip = () => {
+        setHasSeenOnboarding(true);
         navigation.replace('Login');
     };
 
@@ -44,6 +46,7 @@ const OnboardingScreen = ({ navigation }: OnboardingScreenProps) => {
             });
             setCurrentIndex(nextIndex);
         } else {
+            setHasSeenOnboarding(true);
             navigation.replace('Login');
         }
     };
