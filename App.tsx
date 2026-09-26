@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useAppBootstrap } from './src/hooks/useAppBootstrap';
 import { AppProviders } from './src/providers/AppProviders';
 import RootNavigator from './src/navigation/RootNavigator';
+import { notificationService } from './src/services/notification/notificationService';
 
 const App = () => {
   const { isReady } = useAppBootstrap();
+
+  useEffect(() => {
+    // Start notification Listeners
+    notificationService.initializeListeners(data => {
+      console.log("Notification clicked data:", data)
+    });
+  }, [])
 
   if (!isReady) {
     return (
